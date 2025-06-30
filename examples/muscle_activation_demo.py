@@ -35,7 +35,7 @@ def muscle_activation_pattern(t):
 
 # Run simulation
 print(f"Simulating {sim.n_muscles} muscles, {sim.n_joints} joints")
-print(f"Muscle names: {sim.muscle_names[:5]}...")  # Show first 5
+# print(f"Muscle names: {sim.muscle_names[:5]}...")  # Show first 5
 
-viz.run_simulation(muscle_activation_pattern, duration=10.0, log_interval=2.0)
+viz.run_simulation(muscle_activation_pattern, duration=5.0, log_interval=5.0)
 viz.close()

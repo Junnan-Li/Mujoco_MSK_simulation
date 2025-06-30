@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any, List
 class ControlMode(Enum):
     MUSCLE = "muscle"          # Direct muscle activation
     JOINT = "joint"           # Joint-level control
-    # REFLEX = "reflex"         # Reflex-based control
+    EE_Pos = "EE_position"         # end effector position
 
 class MusculoskeletalSimulation:
     """Main musculoskeletal simulation class compatible with MyoSuite models"""
@@ -111,7 +111,7 @@ class MusculoskeletalSimulation:
         
     def get_muscle_forces(self) -> np.ndarray:
         """Get current muscle forces"""
-        return self.data.ten_force.copy()
+        return self.data.actuator_force.copy()
         
     def get_muscle_lengths(self) -> np.ndarray:
         """Get current muscle lengths"""

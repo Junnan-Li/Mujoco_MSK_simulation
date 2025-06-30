@@ -16,6 +16,7 @@ class MusculoskeletalVisualizer:
         """
         self.sim = myoskel_sim
         self.viewer = None
+        self.opt = None
         self.is_running = False
         
         # Visualization options
@@ -30,7 +31,15 @@ class MusculoskeletalVisualizer:
             self.sim.data,
             show_left_ui=False,show_right_ui=False
         )
+
+        self.viewer.opt.geomgroup[1] = False
+        # self.viewer.opt.geomgroup[2] = False
+        
+
+
         self.is_running = True
+
+
         
         # Configure viewer for muscle visualization
         self._configure_muscle_visualization()
@@ -42,8 +51,13 @@ class MusculoskeletalVisualizer:
             self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = True
             
             # Set transparency for better muscle visibility
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-            
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
+
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = False
+
+            print(self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER])
+
+
             # set focus
             self.viewer.cam.azimuth = 180      # Rotate camera 90 degrees around model
             self.viewer.cam.elevation = 0   # Tilt camera downward
