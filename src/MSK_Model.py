@@ -30,7 +30,8 @@ class MusculoskeletalSimulation:
         # Control mode and controller
         self.control_mode = None
         self.controller = None
-        
+        self.control_act_index = []
+
         # Store initial state
         self.initial_qpos = self.data.qpos.copy()
         self.initial_qvel = self.data.qvel.copy()
@@ -131,6 +132,19 @@ class MusculoskeletalSimulation:
         if self.controller:
             self.controller.reset()
             
+
+
+    # 
+    def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
+        indices = []
+        for name in muscle_names:
+            try:
+                idx = self.model.actuator(name).id  
+                indices.append(idx)
+            except KeyError:
+                print(f"[警告] 肌肉名 '{name}' 不存在于 actuator 中，跳过")
+        return np.array(indices, dtype=int)
+
     # Musculoskeletal-specific getters
     def get_muscle_activations(self) -> np.ndarray:
         """Get current muscle activations"""

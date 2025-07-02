@@ -34,36 +34,54 @@ class MusculoskeletalVisualizer:
             show_left_ui=False,show_right_ui=False
         )
 
+        # viewer opt settings
         self.viewer.opt.geomgroup[1] = False
         # self.viewer.opt.geomgroup[2] = False
         
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 0        # Hide cameras
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
+        self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
+        self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
+        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+
         # set focus
         self.viewer.cam.azimuth = 180      # Rotate camera 90 degrees around model
         self.viewer.cam.elevation = 0   # Tilt camera downward
-        self.viewer.cam.distance = 0.2    # Zoom out
-        self.viewer.cam.lookat[:] = [0.8, 0, 1.5]  # Center on torso
+        self.viewer.cam.distance = 0.1    # Zoom out
+        self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
+
+        
 
         self.is_running = True
 
-
-        
         # Configure viewer for muscle visualization
-        self._configure_muscle_visualization()
+        # self._configure_muscle_visualization()
         
     def _configure_muscle_visualization(self):
-        """Configure viewer for optimal muscle visualization"""
+        """Not used. Configure viewer for optimal muscle visualization"""
         if self.viewer:
             # Enable tendon visualization
             self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = True
             
             # Set transparency for better muscle visibility
             self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = False
-
-            print(self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER])
-
-
             
             
     def render(self):
@@ -75,16 +93,20 @@ class MusculoskeletalVisualizer:
             
     def _update_muscle_colors(self):
         """Update muscle colors based on activation levels"""
-        activations = self.sim.get_muscle_activations()
-        
-        # Color muscles based on activation (red = high activation, blue = low activation)
-        for i in range(min(len(activations), self.sim.model.ntendon)):
-            activation = activations[i] if i < len(activations) else 0.0
-            
-            # Set tendon color based on activation
-            # This would require custom rendering - simplified version here
+        # get ctrl
+        excitation = self.sim.get_muscle_activations().reshape(-1, 1)
+        num_excitation = excitation.shape[0]
+        if num_excitation == self.sim.model.ntendon:
+            # Color muscles based on activation (red = high activation, blue = low activation)
+            tendon_colors = np.hstack([excitation,      # R
+                        np.zeros_like(excitation),      # G
+                        1 - excitation,                 # B
+                        np.ones_like(excitation)])      # A
+            self.sim.model.tendon_rgba = tendon_colors
+        else:
             pass
-            
+
+
     def plot_muscle_activations(self):
         """Plot real-time muscle activations (would require matplotlib integration)"""
         activations = self.sim.get_muscle_activations()
@@ -123,14 +145,14 @@ class MusculoskeletalVisualizer:
         while self.is_running and (self.sim.data.time - sim_start_time) < duration:
             # Get control input
             current_time = self.sim.data.time
-            control_input = control_function(current_time)
+            control_input = control_function(current_time,self.sim)
             
             # Step simulation
             self.sim.step(control_input)
             
             # Render
             self.render()
-            print(f'{current_time}')
+            # print(f'{current_time}')
             # Log muscle state
             if current_time - last_log_time >= log_interval:
                 self.plot_muscle_activations()
