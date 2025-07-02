@@ -18,6 +18,8 @@ class MusculoskeletalVisualizer:
         self.viewer = None
         self.opt = None
         self.is_running = False
+
+        self.real_time = True
         
         # Visualization options
         self.show_muscle_forces = True
@@ -35,7 +37,11 @@ class MusculoskeletalVisualizer:
         self.viewer.opt.geomgroup[1] = False
         # self.viewer.opt.geomgroup[2] = False
         
-
+        # set focus
+        self.viewer.cam.azimuth = 180      # Rotate camera 90 degrees around model
+        self.viewer.cam.elevation = 0   # Tilt camera downward
+        self.viewer.cam.distance = 0.2    # Zoom out
+        self.viewer.cam.lookat[:] = [0.8, 0, 1.5]  # Center on torso
 
         self.is_running = True
 
@@ -58,11 +64,7 @@ class MusculoskeletalVisualizer:
             print(self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER])
 
 
-            # set focus
-            self.viewer.cam.azimuth = 180      # Rotate camera 90 degrees around model
-            self.viewer.cam.elevation = 0   # Tilt camera downward
-            self.viewer.cam.distance = 1    # Zoom out
-            self.viewer.cam.lookat[:] = [0.7, 0, 1]  # Center on torso
+            
             
     def render(self):
         """Render current frame with muscle activation coloring"""
@@ -94,7 +96,8 @@ class MusculoskeletalVisualizer:
         print(f"Mean activation: {np.mean(activations):.3f}")
         print(f"Active muscles: {np.sum(activations > 0.1)}/{len(activations)}")
         print("---")
-        
+
+
     def run_simulation(self, 
                       control_function: Callable[[float], np.ndarray],
                       duration: float = 10.0,
@@ -127,14 +130,14 @@ class MusculoskeletalVisualizer:
             
             # Render
             self.render()
-            
+            print(f'{current_time}')
             # Log muscle state
             if current_time - last_log_time >= log_interval:
                 self.plot_muscle_activations()
                 last_log_time = current_time
                 
             # Real-time synchronization
-            if real_time:
+            if self.real_time:
                 elapsed = time.time() - start_time
                 sim_time = self.sim.data.time - sim_start_time
                 if sim_time > elapsed:

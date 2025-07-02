@@ -8,7 +8,7 @@
 ====================================================== -->
 
     <include file="assets/myohand_assets.xml"/>
-    <include file="../scene/myosuite_scene.xml"/>
+    <!-- <include file="../scene/myosuite_scene.xml"/> -->
     <compiler meshdir=".." texturedir=".."/>
 
     <worldbody>

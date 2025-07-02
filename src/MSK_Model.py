@@ -25,6 +25,8 @@ class MusculoskeletalSimulation:
         # Parse musculoskeletal structure
         self._parse_musculoskeletal_structure()
         
+        # do forward simulation
+        self.integrate = True
         # Control mode and controller
         self.control_mode = None
         self.controller = None
@@ -33,6 +35,8 @@ class MusculoskeletalSimulation:
         self.initial_qpos = self.data.qpos.copy()
         self.initial_qvel = self.data.qvel.copy()
         
+
+
     def _parse_musculoskeletal_structure(self):
         """Parse muscle and joint information from the model"""
         # Get muscle information (tendons in MuJoCo represent muscles)
@@ -77,7 +81,27 @@ class MusculoskeletalSimulation:
         # elif mode == ControlMode.REFLEX:
         #     from controllers.reflex_controller import ReflexController
         #     self.controller = ReflexController(self.model, self.data, controller_params)
+
+    def set_q_with_name(self, q_names, q_values):
+        # update the q with given names
+        name_to_index = {}
+        for name in q_names:
+            joint_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name)
+            if joint_id == -1:
+                raise ValueError(f"Joint '{name}' not found.")
+            qpos_addr = self.model.jnt_qposadr[joint_id]
+            qpos_dim = 1 if self.model.jnt_type[joint_id] != mujoco.mjtJoint.mjJNT_FREE else 7
+            if qpos_dim > 1:
+                raise ValueError(f"Joint '{name}' has more than 1 DoF.")
+            name_to_index[name] = qpos_addr
+
+        for name, val in zip(q_names, q_values):
+            index = name_to_index[name]
+            self.data.qpos[index] = val
             
+        mujoco.mj_forward(self.model, self.data)
+
+
     def step(self, control_input: np.ndarray):
         """
         Execute one simulation step with control input
@@ -91,8 +115,11 @@ class MusculoskeletalSimulation:
         # Apply control through the controller
         self.controller.apply_control(control_input)
         
-        # Step the simulation
-        mujoco.mj_step(self.model, self.data)
+        if self.integrate:
+            #  Step the simulation
+            mujoco.mj_step(self.model, self.data)
+        
+
         
     def reset(self):
         """Reset simulation to initial state"""
