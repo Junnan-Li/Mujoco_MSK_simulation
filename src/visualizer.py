@@ -119,6 +119,23 @@ class MusculoskeletalVisualizer:
         print(f"Active muscles: {np.sum(activations > 0.1)}/{len(activations)}")
         print("---")
 
+    def log_data_step(self):
+        """
+        Data record
+        """
+        self.sim.record_data["time"].append(self.sim.data.time)
+        self.sim.record_data["qpos"].append(self.sim.data.qpos.copy())
+        self.sim.record_data["qvel"].append(self.sim.data.qvel.copy())
+        self.sim.record_data["ctrl"].append(self.sim.data.ctrl.copy())
+        self.sim.record_data["mfrc"].append(self.sim.data.actuator_force.copy())
+
+    def transfer_data_to_np(self):
+        """
+        Data record
+        """
+        for key in self.sim.record_data:
+            self.sim.record_data[key] = np.array(self.sim.record_data[key])
+
 
     def run_simulation(self, 
                       control_function: Callable[[float], np.ndarray],
@@ -149,12 +166,16 @@ class MusculoskeletalVisualizer:
             
             # Step simulation
             self.sim.step(control_input)
-            
+
+            # write to sim.record_
+            self.log_data_step()
+
             # Render
             self.render()
             # print(f'{current_time}')
             # Log muscle state
             if current_time - last_log_time >= log_interval:
+                self.plot_muscle_activations()
                 self.plot_muscle_activations()
                 last_log_time = current_time
                 
@@ -164,6 +185,7 @@ class MusculoskeletalVisualizer:
                 sim_time = self.sim.data.time - sim_start_time
                 if sim_time > elapsed:
                     time.sleep(sim_time - elapsed)
+        self.transfer_data_to_np()
                     
     def close(self):
         """Close the viewer"""

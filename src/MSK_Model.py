@@ -35,7 +35,17 @@ class MusculoskeletalSimulation:
         # Store initial state
         self.initial_qpos = self.data.qpos.copy()
         self.initial_qvel = self.data.qvel.copy()
-        
+
+        # Store simulation state
+        self.record_data = {
+            "time": [],
+            "qpos": [],
+            "qvel": [],
+            "ctrl": [],
+            "mfrc": [],
+        }
+            
+
 
 
     def _parse_musculoskeletal_structure(self):
