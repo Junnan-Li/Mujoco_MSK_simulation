@@ -66,8 +66,8 @@ plt.ylabel('Joint Position')
 plt.title('Joint Position over Time')
 plt.legend()
 plt.grid(True)
-plt.tight_layout()
+# plt.tight_layout()
 plt.show()
 
 
-viz.close()
+# viz.close()

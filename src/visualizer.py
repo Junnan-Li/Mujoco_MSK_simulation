@@ -86,10 +86,10 @@ class MusculoskeletalVisualizer:
             
     def render(self):
         """Render current frame with muscle activation coloring"""
-        if self.viewer and self.is_running:
-            if self.show_activation_colors:
+        
+        if self.show_activation_colors:
                 self._update_muscle_colors()
-            self.viewer.sync()
+        self.viewer.sync()
             
     def _update_muscle_colors(self):
         """Update muscle colors based on activation levels"""
@@ -151,41 +151,79 @@ class MusculoskeletalVisualizer:
             real_time: Whether to run in real time
             log_interval: Interval for logging muscle state
         """
-        if not self.is_running:
-            self.launch_viewer()
+        with mujoco.viewer.launch_passive(
+            self.sim.model, 
+            self.sim.data,
+            show_left_ui=False,show_right_ui=False
+        ) as self.viewer:
+
+            # viewer opt settings
+            # self.viewer.opt.geomgroup[1] = False
+            # self.viewer.opt.geomgroup[2] = False
             
-            
-        start_time = time.time()
-        sim_start_time = self.sim.data.time
-        last_log_time = 0
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+
+            # set focus
+            self.viewer.cam.azimuth = 180      # 
+            self.viewer.cam.elevation = 0   # Tilt camera downward
+            self.viewer.cam.distance = .1    # Zoom out
+            self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
+
+            # self.is_running = True
+
         
-        while self.is_running and (self.sim.data.time - sim_start_time) < duration:
-            # Get control input
-            current_time = self.sim.data.time
-            control_input = control_function(current_time,self.sim)
+            start_time = time.time()
+            sim_start_time = self.sim.data.time
+            last_log_time = 0
             
-            # Step simulation
-            self.sim.step(control_input)
-
-            # write to sim.record_
-            self.log_data_step()
-
-            # Render
-            self.render()
-            # print(f'{current_time}')
-            # Log muscle state
-            if current_time - last_log_time >= log_interval:
-                self.plot_muscle_activations()
-                self.plot_muscle_activations()
-                last_log_time = current_time
+            while (self.sim.data.time - sim_start_time) < duration:
+                # Get control input
+                current_time = self.sim.data.time
+                control_input = control_function(current_time,self.sim)
                 
-            # Real-time synchronization
-            if self.real_time:
-                elapsed = time.time() - start_time
-                sim_time = self.sim.data.time - sim_start_time
-                if sim_time > elapsed:
-                    time.sleep(sim_time - elapsed)
-        self.transfer_data_to_np()
+                # Step simulation
+                self.sim.step(control_input)
+
+                # write to sim.record_
+                self.log_data_step()
+
+                # Render
+                self.render()
+                # print(f'{current_time}')
+                # Log muscle state
+                if current_time - last_log_time >= log_interval:
+                    self.plot_muscle_activations()
+                    self.plot_muscle_activations()
+                    last_log_time = current_time
+                    
+                # Real-time synchronization
+                if self.real_time:
+                    elapsed = time.time() - start_time
+                    sim_time = self.sim.data.time - sim_start_time
+                    if sim_time > elapsed:
+                        time.sleep(sim_time - elapsed)
+            self.transfer_data_to_np()
                     
     def close(self):
         """Close the viewer"""
