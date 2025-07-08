@@ -25,64 +25,7 @@ class MusculoskeletalVisualizer:
         self.show_muscle_forces = True
         self.show_activation_colors = True
         self.force_scale = 0.001  # Scale factor for force visualization
-        
-    def launch_viewer(self):
-        """Launch the MuJoCo viewer with muscle visualization"""
-        self.viewer = mujoco.viewer.launch_passive(
-            self.sim.model, 
-            self.sim.data,
-            show_left_ui=False,show_right_ui=False
-        )
-
-        # viewer opt settings
-        self.viewer.opt.geomgroup[1] = False
-        # self.viewer.opt.geomgroup[2] = False
-        
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 0        # Hide cameras
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
-        self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
-        self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
-        # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
-
-        # set focus
-        self.viewer.cam.azimuth = 180      # Rotate camera 90 degrees around model
-        self.viewer.cam.elevation = 0   # Tilt camera downward
-        self.viewer.cam.distance = 0.1    # Zoom out
-        self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
-
-        
-
-        self.is_running = True
-
-        # Configure viewer for muscle visualization
-        # self._configure_muscle_visualization()
-        
-    def _configure_muscle_visualization(self):
-        """Not used. Configure viewer for optimal muscle visualization"""
-        if self.viewer:
-            # Enable tendon visualization
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = True
-            
-            # Set transparency for better muscle visibility
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-            
+                  
             
     def render(self):
         """Render current frame with muscle activation coloring"""
@@ -121,7 +64,7 @@ class MusculoskeletalVisualizer:
 
     def log_data_step(self):
         """
-        Data record
+        Data record tp self.sim.record_data
         """
         self.sim.record_data["time"].append(self.sim.data.time)
         self.sim.record_data["qpos"].append(self.sim.data.qpos.copy())
@@ -131,7 +74,7 @@ class MusculoskeletalVisualizer:
 
     def transfer_data_to_np(self):
         """
-        Data record
+        transfer self.sim.record_data to np.ndarray
         """
         for key in self.sim.record_data:
             self.sim.record_data[key] = np.array(self.sim.record_data[key])
@@ -225,8 +168,8 @@ class MusculoskeletalVisualizer:
                         time.sleep(sim_time - elapsed)
             self.transfer_data_to_np()
                     
-    def close(self):
-        """Close the viewer"""
-        if self.viewer:
-            self.viewer.close()
-            self.is_running = False
+    # def close(self):
+    #     """Close the viewer"""
+    #     if self.viewer:
+    #         self.viewer.close()
+    #         self.is_running = False
