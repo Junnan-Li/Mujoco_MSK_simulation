@@ -27,6 +27,12 @@ class MusculoskeletalSimulation:
         
         # do forward simulation
         self.integrate = True
+
+        # if joints are limited 
+        self.jnt_lock = False
+        self.jnt_lock_id = []
+        self.jnt_lock_value = []
+
         # Control mode and controller
         self.control_mode = None
         self.controller = None
@@ -42,6 +48,7 @@ class MusculoskeletalSimulation:
             "qpos": [],
             "qvel": [],
             "ctrl": [],
+            "act" : [],
             "mfrc": [],
         }
             
@@ -112,6 +119,29 @@ class MusculoskeletalSimulation:
             
         mujoco.mj_forward(self.model, self.data)
 
+    def lock_q_with_name(self, q_names: List[str], q_values: np.ndarray):
+
+        for i in range(len(q_names)):
+            joint_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, q_names[i])
+            if joint_id == -1:
+                raise ValueError(f"Joint '{name}' not found.")
+            self.jnt_lock_id.append(self.model.jnt_qposadr[joint_id])
+            self.jnt_lock_value.append(q_values[i])
+
+        self.jnt_lock = True
+          
+    ## actuator settings
+    def set_actuator_dynprm(self, tau_up, tau_down):
+        """
+        set tau_up and tau_down of muscle activation dynamics
+        """
+        # set muscle activation dynamic parameters
+        
+        for i in range(self.model.nu):
+            if self.model.actuator_trntype[i] == 3:
+                # actuator is muscle type
+                self.model.actuator_dynprm[i,0:2] = np.array([tau_up,tau_down])
+
 
     def step(self, control_input: np.ndarray):
         """
@@ -126,6 +156,11 @@ class MusculoskeletalSimulation:
         # Apply control through the controller
         self.controller.apply_control(control_input)
         
+        if self.jnt_lock:
+            # set qpos to desired value
+            for i in range(len(self.jnt_lock_id)):
+                self.data.qpos[self.jnt_lock_id[i]] = self.jnt_lock_value[i]
+
         if self.integrate:
             #  Step the simulation
             mujoco.mj_step(self.model, self.data)
@@ -134,6 +169,7 @@ class MusculoskeletalSimulation:
         
     def reset(self):
         """Reset simulation to initial state"""
+        # 
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[:] = self.initial_qpos
         self.data.qvel[:] = self.initial_qvel
@@ -152,7 +188,7 @@ class MusculoskeletalSimulation:
                 idx = self.model.actuator(name).id  
                 indices.append(idx)
             except KeyError:
-                print(f"[警告] 肌肉名 '{name}' 不存在于 actuator 中，跳过")
+                print(f"Muscle with name '{name}' does not exist")
         return np.array(indices, dtype=int)
 
     # Musculoskeletal-specific getters

@@ -13,7 +13,7 @@ class MuscleController:
             params = {}
             
         # Muscle activation parameters
-        self.activation_dynamics = params.get('activation_dynamics', True)
+        self.activation_dynamics = params.get('activation_dynamics', False)
         self.tau_act = params.get('tau_activation', 0.015)  # Activation time constant
         self.tau_deact = params.get('tau_deactivation', 0.060)  # Deactivation time constant
         
@@ -38,29 +38,29 @@ class MuscleController:
         excitations = np.clip(excitations, 0.0, 1.0)
         self.muscle_excitations = excitations
         
-        if self.activation_dynamics:
-            # Apply activation dynamics
-            dt = self.model.opt.timestep
+        # if self.activation_dynamics:
+        #     # Apply activation dynamics
+        #     dt = self.model.opt.timestep
             
-            for i in range(len(excitations)):
-                if excitations[i] > self.muscle_activations[i]:
-                    # Activation
-                    tau = self.tau_act
-                else:
-                    # Deactivation
-                    tau = self.tau_deact
+        #     for i in range(len(excitations)):
+        #         if excitations[i] > self.muscle_activations[i]:
+        #             # Activation
+        #             tau = self.tau_act
+        #         else:
+        #             # Deactivation
+        #             tau = self.tau_deact
                     
-                # First-order dynamics
-                self.muscle_activations[i] += (excitations[i] - self.muscle_activations[i]) * dt / tau
+        #         # First-order dynamics
+        #         self.muscle_activations[i] += (excitations[i] - self.muscle_activations[i]) * dt / tau
                 
-            # Clip activations
-            self.muscle_activations = np.clip(self.muscle_activations, 0.0, 1.0)
-        else:
-            # Direct activation (no dynamics)
-            self.muscle_activations = excitations
+        #     # Clip activations
+        #     self.muscle_activations = np.clip(self.muscle_activations, 0.0, 1.0)
+        # else:
+        #     # Direct activation (no dynamics)
+        #     self.muscle_activations = excitations
             
         # Apply muscle activations to MuJoCo control
-        self.data.ctrl[:] = self.muscle_activations * self.max_force_scaling
+        self.data.ctrl[:] = self.muscle_excitations
         
     def get_muscle_activations(self) -> np.ndarray:
         """Get current muscle activations"""

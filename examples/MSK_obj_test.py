@@ -26,6 +26,12 @@ for _ in range(50):
     mujoco.mj_step(sim.model, sim.data)
 
 
+jnt_lock_names = ['pro_sup','flexion','mcp2_abduction','pm2_flexion']
+jnt_lock_values = np.array([0,0,0,0.3])
+sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
+
+print(" Joint locked: " + ", " 
+      .join(mujoco.mj_id2name(sim.model,mujoco.mjtObj.mjOBJ_JOINT,i) for i in sim.jnt_lock_id) )
 MSK_state = sim.get_musculoskeletal_state()
 
 muscle_activations = sim.get_muscle_activations()

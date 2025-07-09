@@ -12,7 +12,7 @@ sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand.xml')
 
 # Set muscle control mode
 muscle_params = {
-    'activation_dynamics': True,
+    'activation_dynamics': False,
     'tau_activation': 0.015,
     'tau_deactivation': 0.060
 }
@@ -27,6 +27,10 @@ sim.control_act_index = sim.get_muscle_index(muscle_names)
 
 joint_fixed = []
 
+# # change muscle activation dynamic parameters to converge faster
+# sim.set_actuator_dynprm(0.005,0.01)
+# print(sim.model.actuator_dynprm[0,0:2])
+
 # Define muscle activation pattern
 def muscle_activation_pattern(t:int, model:MusculoskeletalSimulation):
     """Generate coordinated muscle activation pattern"""
@@ -40,7 +44,9 @@ def muscle_activation_pattern(t:int, model:MusculoskeletalSimulation):
     if len(model.control_act_index)>0:
         for i in model.control_act_index:
             phase = 2 * np.pi * (i / model.control_act_index.shape[0] + wave_speed * t)
-            excitations[i] = np.clip(0.3 + 0.5 * np.sin(phase), 0.0, 1.0)
+            # excitations[i] = np.clip(0.3 + 0.5 * np.sin(phase), 0.0, 1.0)
+            # excitations[i] = np.clip(0.3 + 0.5 * np.random.rand(), 0.0, 1.0)
+            excitations[i] = 0.2
         
     return np.clip(excitations, 0.0, 1.0)
 
@@ -52,7 +58,11 @@ def muscle_activation_pattern(t:int, model:MusculoskeletalSimulation):
 print(f"Simulating {sim.n_muscles} muscles, {sim.n_joints} joints")
 # print(f"Muscle names: {sim.muscle_names[:5]}...")  # Show first 5
 
-viz.run_simulation(muscle_activation_pattern, duration=5.0, log_interval=1.0)
+# jnt_lock_names = ['pro_sup','flexion','mcp2_abduction','pm2_flexion']
+# jnt_lock_values = np.array([0,0,0,0.3])
+# sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
+
+viz.run_simulation(muscle_activation_pattern, duration=3.0, log_interval=1.0)
 
 # print(f'{sim.record_data['time'].shape[0]}')
 # plot
@@ -60,7 +70,7 @@ viz.run_simulation(muscle_activation_pattern, duration=5.0, log_interval=1.0)
 plt.figure(figsize=(10, 5))
 for i in range(sim.record_data["qpos"].shape[1]):
     plt.plot(sim.record_data['time'], sim.record_data['ctrl'][:, i], label=f'ctrl[{i}]')
-    plt.plot(sim.record_data['time'], sim.record_data['mfrc'][:, i], label=f'mfrc[{i}]')
+    plt.plot(sim.record_data['time'], sim.record_data['act'][:, i], label=f'act[{i}]')
 plt.xlabel('Time [s]')
 plt.ylabel('Joint Position')
 plt.title('Joint Position over Time')

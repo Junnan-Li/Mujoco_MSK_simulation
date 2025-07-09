@@ -7,26 +7,63 @@ import time
 class MusculoskeletalVisualizer:
     """Enhanced visualizer for musculoskeletal simulations with muscle activation display"""
     
-    def __init__(self, myoskel_sim):
+    def __init__(self, MSK_model):
         """
         Initialize musculoskeletal visualizer
         
         Args:
-            myoskel_sim: MusculoskeletalSimulation instance
+            MSK_model: MusculoskeletalSimulation instance
         """
-        self.sim = myoskel_sim
+        self.sim = MSK_model
         self.viewer = None
-        self.opt = None
-        self.is_running = False
 
         self.real_time = True
         
         # Visualization options
-        self.show_muscle_forces = True
         self.show_activation_colors = True
-        self.force_scale = 0.001  # Scale factor for force visualization
+        # self.show_muscle_forces = True
+        # self.force_scale = 0.001  # Scale factor for force visualization
                   
-            
+    def _viewer_settings(self):
+        """
+        Setting of model.viewer
+
+        """
+        if  self.viewer:
+            # viewer opt settings
+            # self.viewer.opt.geomgroup[1] = False
+            self.viewer.opt.sitegroup[3] = False
+            # self.viewer.opt.tendongroup[0] = False
+                
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+
+            # set focus
+            self.viewer.cam.azimuth = 180      # 
+            self.viewer.cam.elevation = 0   # Tilt camera downward
+            self.viewer.cam.distance = .1    # Zoom out
+            self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
+
     def render(self):
         """Render current frame with muscle activation coloring"""
         
@@ -70,6 +107,7 @@ class MusculoskeletalVisualizer:
         self.sim.record_data["qpos"].append(self.sim.data.qpos.copy())
         self.sim.record_data["qvel"].append(self.sim.data.qvel.copy())
         self.sim.record_data["ctrl"].append(self.sim.data.ctrl.copy())
+        self.sim.record_data["act"].append(self.sim.data.act.copy())
         self.sim.record_data["mfrc"].append(self.sim.data.actuator_force.copy())
 
     def transfer_data_to_np(self):
@@ -83,7 +121,6 @@ class MusculoskeletalVisualizer:
     def run_simulation(self, 
                       control_function: Callable[[float], np.ndarray],
                       duration: float = 10.0,
-                      real_time: bool = True,
                       log_interval: float = 1.0):
         """
         Run simulation with musculoskeletal visualization
@@ -99,48 +136,14 @@ class MusculoskeletalVisualizer:
             self.sim.data,
             show_left_ui=False,show_right_ui=False
         ) as self.viewer:
-
-            # viewer opt settings
-            # self.viewer.opt.geomgroup[1] = False
-            # self.viewer.opt.geomgroup[2] = False
+            # set viewer
+            self._viewer_settings()
             
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
-
-            # set focus
-            self.viewer.cam.azimuth = 180      # 
-            self.viewer.cam.elevation = 0   # Tilt camera downward
-            self.viewer.cam.distance = .1    # Zoom out
-            self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
-
-            # self.is_running = True
-
-        
             start_time = time.time()
             sim_start_time = self.sim.data.time
             last_log_time = 0
             
-            while (self.sim.data.time - sim_start_time) < duration:
+            while self.viewer.is_running() and (self.sim.data.time - sim_start_time) < duration:
                 # Get control input
                 current_time = self.sim.data.time
                 control_input = control_function(current_time,self.sim)
@@ -156,7 +159,6 @@ class MusculoskeletalVisualizer:
                 # print(f'{current_time}')
                 # Log muscle state
                 if current_time - last_log_time >= log_interval:
-                    self.plot_muscle_activations()
                     self.plot_muscle_activations()
                     last_log_time = current_time
                     
