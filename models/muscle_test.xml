@@ -1,0 +1,74 @@
+<mujoco model="muscle_test">
+  <compiler angle="degree"/>
+  <option timestep="0.002"/>
+
+  <default>
+    <geom rgba="0.8 0.6 0.4 1" friction="1 0.1 0.1" condim="3"/>
+    <joint damping="0.1"/>
+    <tendon rgba="1 0 0 1" width="0.002"/>
+    <muscle ctrllimited="true" ctrlrange="0 1"/>
+  </default>
+
+  <visual>
+    <headlight diffuse="1 1 1" specular="0.5 0.5 0.5" active="1" />
+  </visual>
+  <asset>
+    <texture name="plane" type="2d" builtin="checker" rgb1=".1 .1 .1" rgb2=".9 .9 .9"
+            width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <material name="plane" reflectance="0.3" texture="plane" texrepeat="1 1" texuniform="true" />
+  </asset>
+  <worldbody>
+    <geom name="floor" type="plane" pos="0 0 -0.5" size="10 10 0.1" material="plane" condim="3"/>
+
+    <body name="cylinder1" pos="-0.1 0 0.1">
+      <joint name="freejoint1" type="free" pos="-0.1 0 0"/>
+      <geom type="cylinder" size="0.03 0.1" rgba="0.9 0.6 0.1 1"/>
+      <site name="attach_moving1" pos="0.0 0 0.1" size="0.005" rgba="0 0 1 1"/>
+    </body>
+    <body name="cylinder2" pos="0 0 0.1">
+      <joint name="freejoint2" type="free" pos="0 0 0"/>
+      <geom type="cylinder" size="0.03 0.1" rgba="0.6 0.9 0.1 1"/>
+      <site name="attach_moving2" pos="0.0 0 0.1" size="0.005" rgba="0 0 1 1"/>
+    </body>
+    <body name="cylinder3" pos="0.1 0 0.1">
+      <joint name="freejoint3" type="free" pos="0.1 0 0"/>
+      <geom type="cylinder" size="0.03 0.1" rgba="0.1 0.6 0.9 1"/>
+      <site name="attach_moving3" pos="0.0 0 0.1" size="0.005" rgba="0 0 1 1"/>
+    </body>
+
+    <site name="attach_fixed1" pos="-0.1 0 0.5" size="0.005" rgba="1 0 0 1"/>
+    <site name="attach_fixed2" pos="-0 0 0.5" size="0.005" rgba="1 0 0 1"/>
+    <site name="attach_fixed3" pos=" 0.1 0 0.5" size="0.005" rgba="1 0 0 1"/>
+
+  </worldbody>
+
+  <tendon>
+    <spatial name="muscle_tendon1">
+      <site site="attach_fixed1"/>
+      <site site="attach_moving1"/>
+    </spatial>
+    <spatial name="muscle_tendon2">
+      <site site="attach_fixed2"/>
+      <site site="attach_moving2"/>
+    </spatial>
+    <spatial name="muscle_tendon3">
+      <site site="attach_fixed3"/>
+      <site site="attach_moving3"/>
+    </spatial>
+  </tendon>
+
+  <actuator>
+    <muscle name="puller1"
+            tendon="muscle_tendon1"
+            force="10"
+            lengthrange="0.1 0.5"/>
+    <muscle name="puller2"
+            tendon="muscle_tendon2"
+            force="20"
+            lengthrange="0.1 0.5"/>
+    <muscle name="puller3"
+            tendon="muscle_tendon3"
+            force="20"
+            lengthrange="0.1 0.5"/>
+  </actuator>
+</mujoco>
