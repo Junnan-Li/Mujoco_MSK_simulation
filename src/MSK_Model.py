@@ -43,14 +43,8 @@ class MusculoskeletalSimulation:
         self.initial_qvel = self.data.qvel.copy()
 
         # Store simulation state
-        self.record_data = {
-            "time": [],
-            "qpos": [],
-            "qvel": [],
-            "ctrl": [],
-            "act" : [],
-            "mfrc": [],
-        }
+        # need define callback function
+        self.record_data = {}
             
 
 
@@ -134,6 +128,9 @@ class MusculoskeletalSimulation:
     def set_actuator_dynprm(self, tau_up, tau_down):
         """
         set tau_up and tau_down of muscle activation dynamics
+        
+        usage: 
+            sim.set_actuator_dynprm(0.005,0.01)
         """
         # set muscle activation dynamic parameters
         

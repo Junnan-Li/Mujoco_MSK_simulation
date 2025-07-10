@@ -49,4 +49,4 @@ while viz.is_running and (time.time() - sim_start_time) < duration:
         if sim_time > elapsed:
             time.sleep(sim_time - elapsed)
 print('simulation finish')
-viz.close()
+# viz.close()

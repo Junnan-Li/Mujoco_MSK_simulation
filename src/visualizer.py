@@ -3,11 +3,12 @@ import mujoco.viewer
 import numpy as np
 from typing import Optional, Callable
 import time
+from src.MSK_Model import MusculoskeletalSimulation
 
 class MusculoskeletalVisualizer:
     """Enhanced visualizer for musculoskeletal simulations with muscle activation display"""
     
-    def __init__(self, MSK_model):
+    def __init__(self, MSK_model, azimuth=0, elevation=0, distance=0,lookat=[0,0,0]):
         """
         Initialize musculoskeletal visualizer
         
@@ -19,6 +20,12 @@ class MusculoskeletalVisualizer:
 
         self.real_time = True
         
+        # settings
+        self.azimuth = azimuth
+        self.elevation = elevation
+        self.distance = distance
+        self.lookat = lookat
+
         # Visualization options
         self.show_activation_colors = True
         # self.show_muscle_forces = True
@@ -31,38 +38,49 @@ class MusculoskeletalVisualizer:
         """
         if  self.viewer:
             # viewer opt settings
-            # self.viewer.opt.geomgroup[1] = False
-            self.viewer.opt.sitegroup[3] = False
+            self.viewer.opt.geomgroup[1] = False
+            # self.viewer.opt.sitegroup[1] = False
             # self.viewer.opt.tendongroup[0] = False
                 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 0       # Show textures
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 1       # Show textures
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1        # Hide actuators
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1      # Hide actuators
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTIVATION] = 1    # Hide activation
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_LIGHT] = 0         # Hide lights
             self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TENDON] = 1        # Show tendons
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_RANGEFINDER] = 0   # Hide range finders
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONSTRAINT] = 1    # Show constraints
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0       # Hide inertia boxes
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_INERTIA] = 0      # Hide inertia boxes
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SCLINERTIA] = 0    # Hide scaled inertia
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = 0     # Hide perturbation forces
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTOBJ] = 0       # Hide perturbation object
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = 1  # Show contact points
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ISLAND] = 1        # Show contact points    
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = 1  # Show contact forces
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTSPLIT] = 0  # Hide contact splits
             self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = 0   # Disable transparency
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXVERT] = 0      # Hide flex vertices
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXEDGE] = 1      # Show flex edges
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXFACE] = 1      # Show element faces
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXSKIN] = 1      # Show flex smooth skin
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = 0       # Hide body bounding volume
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXBVH] = 1       # Show flex bounding volume
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_MESHBVH] = 1       # Show mesh bounding volume 
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SDFITER] = 1       # Show 
 
             # set focus
-            self.viewer.cam.azimuth = 180      # 
-            self.viewer.cam.elevation = 0   # Tilt camera downward
-            self.viewer.cam.distance = .1    # Zoom out
-            self.viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
+            self.viewer.cam.azimuth = self.azimuth      # 
+            self.viewer.cam.elevation = self.elevation   # Tilt camera downward
+            self.viewer.cam.distance = self.distance    # Zoom out
+            self.viewer.cam.lookat = self.lookat   # Center 
 
     def render(self):
         """Render current frame with muscle activation coloring"""
@@ -71,6 +89,12 @@ class MusculoskeletalVisualizer:
                 self._update_muscle_colors()
         self.viewer.sync()
             
+    @staticmethod
+    def draw_frame(pos:np.ndarray ,orientation, AxisLen: float=0.1):
+        pass
+
+
+
     def _update_muscle_colors(self):
         """Update muscle colors based on activation levels"""
         # get ctrl
@@ -94,21 +118,9 @@ class MusculoskeletalVisualizer:
         
         # Print activation summary
         print(f"Time: {self.sim.data.time:.3f}")
-        print(f"Max activation: {np.max(activations):.3f}")
-        print(f"Mean activation: {np.mean(activations):.3f}")
-        print(f"Active muscles: {np.sum(activations > 0.1)}/{len(activations)}")
+        print(f"muscle activation: {activations}")
+        print(f"muscle force: {forces}")
         print("---")
-
-    def log_data_step(self):
-        """
-        Data record tp self.sim.record_data
-        """
-        self.sim.record_data["time"].append(self.sim.data.time)
-        self.sim.record_data["qpos"].append(self.sim.data.qpos.copy())
-        self.sim.record_data["qvel"].append(self.sim.data.qvel.copy())
-        self.sim.record_data["ctrl"].append(self.sim.data.ctrl.copy())
-        self.sim.record_data["act"].append(self.sim.data.act.copy())
-        self.sim.record_data["mfrc"].append(self.sim.data.actuator_force.copy())
 
     def transfer_data_to_np(self):
         """
@@ -117,9 +129,58 @@ class MusculoskeletalVisualizer:
         for key in self.sim.record_data:
             self.sim.record_data[key] = np.array(self.sim.record_data[key])
 
+    def default_control_function(t: float) -> np.ndarray:
+        print('no control function is give')
+
+
+    def default_log_function(model:MusculoskeletalSimulation):
+        """
+        log information in terminal 
+        """
+        pass
+        # # template of log_function
+        # activations = model.get_muscle_activations()
+        # forces = model.get_muscle_forces()
+        # site_dis = [np.linalg.norm(model.data.site(i).xpos - model.data.site(i+3).xpos)
+        #             for i in range(3)]
+        
+        # # Print activation summary
+        # print(f"Time: {model.data.time:.3f}")
+        # print(f"muscle activation: {activations}")
+        # print(f"muscle force: {forces}")
+        # print(f"site distance: {site_dis}")
+        # print("---")
+
+    def default_record_function(model:MusculoskeletalSimulation):
+        """
+        record simulation data into model.record_data
+        """
+        pass
+        #
+        # if len(model.record_data) == 0:
+        #     model.record_data = {
+        #             "time": [],
+        #             "qpos": [],
+        #             "qvel": [],
+        #             "ctrl": [],
+        #             "act" : [],
+        #             "mfrc": [],
+        #             "site_dis":[]
+        #         }
+
+        # site_dis = np.linalg.norm(model.data.site(0).xpos - model.data.site(1).xpos)
+        # model.record_data["time"].append(model.data.time)
+        # model.record_data["qpos"].append(model.data.qpos.copy())
+        # model.record_data["qvel"].append(model.data.qvel.copy())
+        # model.record_data["ctrl"].append(model.data.ctrl.copy())
+        # model.record_data["act"].append(model.data.act.copy())
+        # model.record_data["mfrc"].append(model.data.actuator_force.copy())
+        # model.record_data["site_dis"].append(site_dis)
 
     def run_simulation(self, 
                       control_function: Callable[[float], np.ndarray],
+                      log_function: Callable = default_log_function, 
+                      record_function: Callable = default_record_function,
                       duration: float = 10.0,
                       log_interval: float = 1.0):
         """
@@ -152,14 +213,14 @@ class MusculoskeletalVisualizer:
                 self.sim.step(control_input)
 
                 # write to sim.record_
-                self.log_data_step()
+                record_function(self.sim)
 
                 # Render
                 self.render()
-                # print(f'{current_time}')
+                
                 # Log muscle state
                 if current_time - last_log_time >= log_interval:
-                    self.plot_muscle_activations()
+                    log_function(self.sim)
                     last_log_time = current_time
                     
                 # Real-time synchronization
@@ -168,6 +229,8 @@ class MusculoskeletalVisualizer:
                     sim_time = self.sim.data.time - sim_start_time
                     if sim_time > elapsed:
                         time.sleep(sim_time - elapsed)
+            
+            # transfer data to numpy array
             self.transfer_data_to_np()
                     
     # def close(self):

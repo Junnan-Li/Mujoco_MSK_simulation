@@ -7,6 +7,9 @@ from src.MSK_Model import MusculoskeletalSimulation, ControlMode
 from src.visualizer import MusculoskeletalVisualizer
 import matplotlib.pyplot as plt
 
+
+
+
 # Initialize simulation with MyoSuite-style model
 sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand.xml')
 
@@ -19,7 +22,12 @@ muscle_params = {
 sim.set_control_mode(ControlMode.MUSCLE, muscle_params)
 
 # Initialize visualizer
-viz = MusculoskeletalVisualizer(sim)
+# viewer.cam.azimuth = 180      # 
+# viewer.cam.elevation = 0   # Tilt camera downward
+# viewer.cam.distance = .1    # Zoom out
+# viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
+
+viz = MusculoskeletalVisualizer(sim, azimuth=180, elevation=0,distance=0.1,lookat=[0.4, -0.25, 1.5])
 
 
 muscle_names =  ['FDS2','FDP2','EDC2','EIP']
@@ -50,7 +58,15 @@ def muscle_activation_pattern(t:int, model:MusculoskeletalSimulation):
         
     return np.clip(excitations, 0.0, 1.0)
 
-
+def log_data_runtime(model:MusculoskeletalSimulation):
+    activations = model.get_muscle_activations()
+    forces = model.get_muscle_forces()
+    
+    # Print activation summary
+    print(f"Time: {model.data.time:.3f}")
+    print(f"muscle activation: {activations}")
+    print(f"muscle force: {forces}")
+    print("---")
 
 
 
@@ -62,7 +78,7 @@ print(f"Simulating {sim.n_muscles} muscles, {sim.n_joints} joints")
 # jnt_lock_values = np.array([0,0,0,0.3])
 # sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
-viz.run_simulation(muscle_activation_pattern, duration=3.0, log_interval=1.0)
+viz.run_simulation(muscle_activation_pattern,log_function=log_data_runtime , duration=5.0, log_interval=1.0)
 
 # print(f'{sim.record_data['time'].shape[0]}')
 # plot
