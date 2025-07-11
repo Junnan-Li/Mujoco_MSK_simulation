@@ -161,6 +161,9 @@ class MusculoskeletalSimulation:
         if self.integrate:
             #  Step the simulation
             mujoco.mj_step(self.model, self.data)
+        else:
+            # only forward without integrate
+            mujoco.mj_forward(self.model, self.data)
         
 
         

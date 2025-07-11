@@ -30,7 +30,9 @@ class MusculoskeletalVisualizer:
         self.show_activation_colors = True
         # self.show_muscle_forces = True
         # self.force_scale = 0.001  # Scale factor for force visualization
-                  
+
+        self.scene = mujoco.MjvScene(self.sim.model, maxgeom=1000)
+        
     def _viewer_settings(self):
         """
         Setting of model.viewer
@@ -39,7 +41,7 @@ class MusculoskeletalVisualizer:
         if  self.viewer:
             # viewer opt settings
             self.viewer.opt.geomgroup[1] = False
-            # self.viewer.opt.sitegroup[1] = False
+            self.viewer.opt.sitegroup[2] = False
             # self.viewer.opt.tendongroup[0] = False
                 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
@@ -89,9 +91,27 @@ class MusculoskeletalVisualizer:
                 self._update_muscle_colors()
         self.viewer.sync()
             
-    @staticmethod
-    def draw_frame(pos:np.ndarray ,orientation, AxisLen: float=0.1):
-        pass
+    # @staticmethod
+    def draw_frame(self, pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
+        """Draw RGB axis lines at given position and orientation."""
+        rot = xmat.reshape(3, 3)
+        colors = [(1, 0, 0, 1),  # X - red
+                (0, 0, 1, 1),  # Y - blue
+                (0, 1, 0, 1)]  # Z - green
+
+        for i in range(3):
+            self.scene.ngeom += 1
+            mujoco.mjv_initGeom(
+                self.scene.geoms[self.scene.ngeom-1],
+                mujoco.mjtGeom.mjGEOM_LINE,
+                np.array([AxisLen, 0, 0]),
+                pos=pos,
+                mat=xmat,
+                rgba=np.array(colors[i])
+            )
+            mujoco.mjv_connector(self.scene.geoms[self.scene.ngeom-1],
+                       mujoco.mjtGeom.mjGEOM_CAPSULE, 0.1,
+                       pos, pos + np.array([0.1,0,0]))
 
 
 

@@ -21,7 +21,7 @@
 
         <geom name="body" type="mesh" mesh="human_body" euler="0 0 3.14" contype="0" conaffinity="0"/>
         <body name="full_body" pos="-.025 0.1 1.40">
-            <include file="./assets/myoarm_body.xml"/>
+            <include file="./assets/myoarm_body_modified.xml"/>
         </body>
     </worldbody>
 
