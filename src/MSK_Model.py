@@ -196,12 +196,12 @@ class MusculoskeletalSimulation:
         # for i in range(len(site_name)):
         site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
         if  site_id == -1:
-            raise ValueError(f"Site '{site_name[i]}' not found.")
+            raise ValueError(f"Site '{site_name}' not found.")
         
         mujoco.mj_jacSite(self.model, self.data, jac[:3], jac[3:], site_id) 
         return jac
 
-    def ik_site(self, site_name: str="", method: str="NR", optprm:OptimParams=OptimParams()):
+    def ik_site(self, site_name: str="", method: str="NR", optprm: OptimParams=OptimParams()):
         pass
 
     def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
