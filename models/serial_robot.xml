@@ -30,6 +30,18 @@
         </default>
     </default>
 
+    <tendon>
+    <spatial class="muscle" name="tendon1" >
+      <site site="muscle_site_1"/>
+      <!-- <geom geom="Elbow_PT_ECRL_wrap" sidesite="Elbow_PT_ECRL_site_ECRL_side"></geom> -->
+      <site site="muscle_site_2"/>
+      <site site="muscle_site_3"/>
+      <!-- <geom geom="ECRL_torus_wrap" sidesite="ECRL_torus_site_ECRL_side"/> -->
+      <site site="muscle_site_4"/>
+      <site site="muscle_site_5"/>
+      <site site="muscle_site_6"/>
+    </spatial>
+    </tendon>
     <worldbody>
         <geom name="floor" pos="0 0 0" size="10 10 .1" type="plane" material="plane"
             condim="3" />
@@ -67,6 +79,10 @@
                 </body>
             </body>
         </body>
-
     </worldbody>
+    <actuator>
+        <muscle name="muscle1" force="337.3" class="muscle" tendon="tendon1" lengthrange="0.313191 0.341072"/>
+    </actuator>
+
+
 </mujoco>

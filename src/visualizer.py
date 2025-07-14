@@ -1,7 +1,7 @@
 import mujoco
 import mujoco.viewer
 import numpy as np
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 import time
 from src.MSK_Model import MusculoskeletalSimulation
 
@@ -96,7 +96,7 @@ class MusculoskeletalVisualizer:
         self.viewer.sync()
             
     # @staticmethod
-    def draw_site_frame(self, site_names: list[str]=[], AxisLen: float=0.1):
+    def draw_site_frame(self, site_names: List[str]=[], AxisLen: float=0.1):
                 #    pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
         """Draw RGB axis lines at given position and orientation."""
         pass

@@ -2,6 +2,8 @@ import mujoco
 import numpy as np
 from enum import Enum
 from typing import Optional, Dict, Any, List
+from src.OptimParams import OptimParams
+
 
 class ControlMode(Enum):
     MUSCLE = "muscle"          # Direct muscle activation
@@ -198,6 +200,9 @@ class MusculoskeletalSimulation:
         
         mujoco.mj_jacSite(self.model, self.data, jac[:3], jac[3:], site_id) 
         return jac
+
+    def ik_site(self, site_name: str="", method: str="NR", optprm:OptimParams=OptimParams()):
+        pass
 
     def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
         indices = []
