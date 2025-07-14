@@ -70,7 +70,7 @@ with mujoco.viewer.launch_passive(
         sim_start_time = viz.sim.data.time
         last_log_time = 0
         
-        print(viz.viewer.opt.flags)
+        # print(viz.viewer.opt.flags)
         while viz.viewer.is_running() and (viz.sim.data.time - sim_start_time) < duration:
             # Get control input
             current_time = viz.sim.data.time
@@ -81,9 +81,8 @@ with mujoco.viewer.launch_passive(
 
             sim.step(np.zeros(sim.model.nu))
 
-
-            viz.viewer.user_scn.ngeom = 0
-            viz.draw_frame(sim.data.site('MFtip').xpos,sim.data.site('MFtip').xmat,1)
+            # viz.viewer.user_scn.ngeom = 0
+            # viz.draw_frame(sim.data.site('MFtip').xpos,sim.data.site('MFtip').xmat,0.1)
 
             # viz.viewer.user_scn.ngeom = i
             # print(viz.viewer.user_scn.ngeom)

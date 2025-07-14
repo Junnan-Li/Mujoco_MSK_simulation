@@ -118,7 +118,7 @@ class MusculoskeletalSimulation:
         for i in range(len(q_names)):
             joint_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, q_names[i])
             if joint_id == -1:
-                raise ValueError(f"Joint '{name}' not found.")
+                raise ValueError(f"Joint '{q_names[i]}' not found.")
             self.jnt_lock_id.append(self.model.jnt_qposadr[joint_id])
             self.jnt_lock_value.append(q_values[i])
 

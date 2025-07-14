@@ -92,26 +92,35 @@ class MusculoskeletalVisualizer:
         self.viewer.sync()
             
     # @staticmethod
-    def draw_frame(self, pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
+    def draw_site_frame(self):
+                #    pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
         """Draw RGB axis lines at given position and orientation."""
-        rot = xmat.reshape(3, 3)
-        colors = [(1, 0, 0, 1),  # X - red
-                (0, 0, 1, 1),  # Y - blue
-                (0, 1, 0, 1)]  # Z - green
+        pass
+        # colors = [(1, 0, 0, 1),  # X - red
+        #         (0, 0, 1, 1),  # Y - blue
+        #         (0, 1, 0, 1)]  # Z - green
+        # for name in site_names:
+            
+        #     rotm = xmat.reshape(3, 3)
+            
 
-        for i in range(3):
-            self.scene.ngeom += 1
-            mujoco.mjv_initGeom(
-                self.scene.geoms[self.scene.ngeom-1],
-                mujoco.mjtGeom.mjGEOM_LINE,
-                np.array([AxisLen, 0, 0]),
-                pos=pos,
-                mat=xmat,
-                rgba=np.array(colors[i])
-            )
-            mujoco.mjv_connector(self.scene.geoms[self.scene.ngeom-1],
-                       mujoco.mjtGeom.mjGEOM_CAPSULE, 0.1,
-                       pos, pos + np.array([0.1,0,0]))
+        #     for i in range(3):
+        #         self.viewer.user_scn.ngeom += 1
+        #         arrow_to = pos + AxisLen * rotm[:, i]
+        #         mujoco.mjv_initGeom(
+        #             geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
+        #             type=mujoco.mjtGeom.mjGEOM_ARROW.value,
+        #             size=np.zeros(3),
+        #             pos=np.zeros(3),
+        #             mat=np.zeros(9),
+        #             rgba=np.array(colors[i])
+        #         )
+        #         mujoco.mjv_connector(
+        #             geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
+        #             type=mujoco.mjtGeom.mjGEOM_ARROW.value,
+        #             width=0.02*AxisLen,
+        #             from_=pos,
+        #             to=arrow_to)
 
 
 
