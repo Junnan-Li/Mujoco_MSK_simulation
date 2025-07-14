@@ -13,7 +13,7 @@ import itertools
 
 
 # Initialize simulation with MyoSuite-style model
-sim = MusculoskeletalSimulation('./models/myo_sim/arm/myoarm.xml')
+sim = MusculoskeletalSimulation('./models/serial_robot.xml')
 
 # Set muscle control mode
 muscle_params = {
@@ -24,36 +24,26 @@ muscle_params = {
 sim.set_control_mode(ControlMode.MUSCLE, muscle_params)
 
 
-viz = MusculoskeletalVisualizer(sim, azimuth=90, elevation=0, distance=1,lookat=[0, -0.5, 1.2])
-
-# jnt_lock_names = ['pro_sup','flexion','mcp2_abduction','pm2_flexion']
-# jnt_lock_values = np.array([0,0,0,0.3])
-# sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
-
+viz = MusculoskeletalVisualizer(sim, azimuth=90, elevation=0, distance=1,lookat=[0, -0.5, 0.5])
 # viz.run_simulation(muscle_activation_pattern,log_function=log_data_runtime , duration=5.0, log_interval=1.0)
 
 print(f'{sim.joint_names}')
 # plot
 
-MSK_state = sim.get_musculoskeletal_state()
 
-muscle_activations = sim.get_muscle_activations()
-muscle_forces = sim.get_muscle_forces()
-qpos = sim.get_joint_positions()
-qvel = sim.get_joint_velocities()
-qtorque = sim.get_joint_torques()
+# joint_names =  ['mcp2_flexion','mcp2_abduction','pm2_flexion','md2_flexion']
 
+# index = [i for i in range(38) if i < 10 or i > 17]
+# jnt_lock_names = []
+# for i in index:
+#     jnt_lock_names.append(sim.joint_names[i])
+# jnt_lock_values = np.zeros(len(jnt_lock_names))
+# sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
-joint_names =  ['mcp2_flexion','mcp2_abduction','pm2_flexion','md2_flexion']
-
-index = [i for i in range(38) if i < 10 or i > 17]
-jnt_lock_names = []
-for i in index:
-    jnt_lock_names.append(sim.joint_names[i])
-jnt_lock_values = np.zeros(len(jnt_lock_names))
-sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
-
-
+sim.model.vis.scale.framelength = 0.2
+sim.model.vis.scale.framewidth = 0.03
+sim.model.vis.scale.jointlength = 1
+sim.model.vis.scale.jointwidth = 0.015
 sim.integrate = True
 duration = 5
 with mujoco.viewer.launch_passive(
@@ -61,8 +51,9 @@ with mujoco.viewer.launch_passive(
             sim.data,
             show_left_ui=False,show_right_ui=False
         ) as viz.viewer:
+
         viz._viewer_settings()
-            
+        viz.render()
         # viz.viewer.user_scn.flags[mujoco.mjtRndFlag.mjRND_WIREFRAME] = 1
         # viz.viewer.sync()
 
@@ -82,11 +73,12 @@ with mujoco.viewer.launch_passive(
             sim.step(np.zeros(sim.model.nu))
 
             viz.viewer.user_scn.ngeom = 0
-            viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
+            viz.draw_site_frame(site_names=['site1'],AxisLen=0.2)
 
-            jac = sim.get_site_Jac('MFtip')
+            jac = sim.get_site_Jac('site1')
             # viz.viewer.user_scn.ngeom = i
             # print(viz.viewer.user_scn.ngeom)
+
             # Render
             viz.render()
             # print(sim.model.jnt_range[:3])

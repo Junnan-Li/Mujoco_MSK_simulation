@@ -39,14 +39,18 @@ class MusculoskeletalVisualizer:
 
         """
         if  self.viewer:
+
+            # frame 
+            self.viewer.opt.frame = True
+            
             # viewer opt settings
-            self.viewer.opt.geomgroup[1] = False
-            self.viewer.opt.sitegroup[2] = False
+            # self.viewer.opt.geomgroup[1] = False
+            self.viewer.opt.sitegroup[2] = True
             # self.viewer.opt.tendongroup[0] = False
                 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 1       # Show textures
-            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 1         # Show joints
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1      # Hide actuators
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTIVATION] = 1    # Hide activation
@@ -66,13 +70,13 @@ class MusculoskeletalVisualizer:
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_AUTOCONNECT] = 1   # Auto-connect bodies
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_COM] = 0           # Hide center of mass
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SELECT] = 1        # Show selection
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = 1        # Show static bodies
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = 1          # Show skin
 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXVERT] = 0      # Hide flex vertices
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXEDGE] = 1      # Show flex edges
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXFACE] = 1      # Show element faces
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXSKIN] = 1      # Show flex smooth skin
+            # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXSKIN] = 1      # Show flex smooth skin
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_BODYBVH] = 0       # Hide body bounding volume
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_FLEXBVH] = 1       # Show flex bounding volume
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_MESHBVH] = 1       # Show mesh bounding volume 
@@ -92,35 +96,39 @@ class MusculoskeletalVisualizer:
         self.viewer.sync()
             
     # @staticmethod
-    def draw_site_frame(self):
+    def draw_site_frame(self, site_names: list[str]=[], AxisLen: float=0.1):
                 #    pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
         """Draw RGB axis lines at given position and orientation."""
         pass
-        # colors = [(1, 0, 0, 1),  # X - red
-        #         (0, 0, 1, 1),  # Y - blue
-        #         (0, 1, 0, 1)]  # Z - green
-        # for name in site_names:
-            
-        #     rotm = xmat.reshape(3, 3)
-            
-
-        #     for i in range(3):
-        #         self.viewer.user_scn.ngeom += 1
-        #         arrow_to = pos + AxisLen * rotm[:, i]
-        #         mujoco.mjv_initGeom(
-        #             geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
-        #             type=mujoco.mjtGeom.mjGEOM_ARROW.value,
-        #             size=np.zeros(3),
-        #             pos=np.zeros(3),
-        #             mat=np.zeros(9),
-        #             rgba=np.array(colors[i])
-        #         )
-        #         mujoco.mjv_connector(
-        #             geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
-        #             type=mujoco.mjtGeom.mjGEOM_ARROW.value,
-        #             width=0.02*AxisLen,
-        #             from_=pos,
-        #             to=arrow_to)
+        colors = [(1, 0, 0, 1),  # X - red
+                (0, 1, 0, 1),  # Y - green
+                (0, 0, 1, 1)]  # Z - blue
+        for name in site_names:
+            # check is site existed
+            site_id = mujoco.mj_name2id(self.sim.model, mujoco.mjtObj.mjOBJ_SITE,name)
+            if  site_id == -1:
+                raise ValueError(f"Site '{name}' not found.")
+                
+            pos = self.sim.data.site_xpos[site_id]
+            rotm = self.sim.data.site_xmat[site_id].reshape(3, 3)
+            for i in range(3):
+                # add one user_scn.geom
+                self.viewer.user_scn.ngeom += 1
+                arrow_to = pos + AxisLen * rotm[:, i]
+                mujoco.mjv_initGeom(
+                    geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
+                    type=mujoco.mjtGeom.mjGEOM_ARROW.value,
+                    size=np.zeros(3),
+                    pos=np.zeros(3),
+                    mat=np.zeros(9),
+                    rgba=np.array(colors[i])
+                )
+                mujoco.mjv_connector(
+                    geom=self.viewer.user_scn.geoms[self.viewer.user_scn.ngeom-1],
+                    type=mujoco.mjtGeom.mjGEOM_ARROW.value,
+                    width=0.02*AxisLen,
+                    from_=pos,
+                    to=arrow_to)
 
 
 
@@ -210,6 +218,7 @@ class MusculoskeletalVisualizer:
                       control_function: Callable[[float], np.ndarray],
                       log_function: Callable = default_log_function, 
                       record_function: Callable = default_record_function,
+                      render_function: Callable = None,
                       duration: float = 10.0,
                       log_interval: float = 1.0):
         """

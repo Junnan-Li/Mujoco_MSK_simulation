@@ -71,6 +71,13 @@ class MusculoskeletalSimulation:
         for i in range(self.n_actuators):
             name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
             self.actuator_names.append(name if name else f"actuator_{i}")
+
+        # # Get site information (muscle actuators)
+        # self.n_actuators = self.model.nu
+        # self.actuator_names = []
+        # for i in range(self.n_actuators):
+        #     name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
+        #     self.actuator_names.append(name if name else f"actuator_{i}")
             
     def set_control_mode(self, mode: ControlMode, controller_params: Optional[Dict] = None):
         """
@@ -181,6 +188,17 @@ class MusculoskeletalSimulation:
 
 
     # 
+    def get_site_Jac(self, site_name: str) -> np.ndarray:
+        jac = np.empty((6,self.model.nv))
+        # jacr = np.empty(3,len(site_name))
+        # for i in range(len(site_name)):
+        site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
+        if  site_id == -1:
+            raise ValueError(f"Site '{site_name[i]}' not found.")
+        
+        mujoco.mj_jacSite(self.model, self.data, jac[:3], jac[3:], site_id) 
+        return jac
+
     def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
         indices = []
         for name in muscle_names:
