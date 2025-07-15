@@ -2,8 +2,9 @@ import mujoco
 import numpy as np
 from enum import Enum
 from typing import Optional, Dict, Any, List
-from src.OptimParams import OptimParams
-
+from src.IKParams import IK_Params
+from src.IKParams import IK_Target
+from scipy.spatial.transform import Rotation as R
 
 class ControlMode(Enum):
     MUSCLE = "muscle"          # Direct muscle activation
@@ -201,8 +202,50 @@ class MusculoskeletalSimulation:
         mujoco.mj_jacSite(self.model, self.data, jac[:3], jac[3:], site_id) 
         return jac
 
-    def ik_site(self, site_name: str="", method: str="NR", optprm: OptimParams=OptimParams()):
-        pass
+
+    def ik_site(self, site_name: str="", method: str="NR", target: IK_Target=IK_Target() ,ikprm: IK_Params=IK_Params()):
+        """
+        Inverse Kinematic of a site:
+            Methods 
+                Newton-Raphson
+                Gaussian-Newton
+                Levenburg-Marquadt
+
+            ikprm: IK parameters 
+        """
+        # check if site exists
+        site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
+        if  site_id == -1:
+            raise ValueError(f"Site '{site_name}' not found.")
+        
+        for iter in range(ikprm.max_iter):
+            mujoco.mj_forward(self.model, self.data)
+
+            # calcualte error 
+            site_pos = self.data.site_xpos[site_id]
+            error_pos = target.target_pos - site_pos
+            
+
+            site_jac_all = self.get_site_Jac(site_name)
+            if ikprm.tran_only:
+                error_6D = error_pos
+                site_jac = site_jac_all[:3]
+            else:
+                site_rotm = self.data.site_xmat[site_id].reshape(3, 3)
+                target_rotm = R.from_quat(target.target_quat, scalar_first=True).as_matrix()
+                error_rotm = target_rotm @ site_rotm.T
+                error_rotv = R.from_matrix(error_rotm).as_rotvec()
+                error_6D = np.concatenate([error_pos.ravel(), error_rotv.ravel()])
+                site_jac = site_jac_all
+
+            if np.linalg.norm(error_6D) < ikprm.tol:
+                pass
+                return True
+            
+            # match 
+            # delta_qpos = step_size * jac_full.T @ error_6d 
+
+        # pass
 
     def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
         indices = []
