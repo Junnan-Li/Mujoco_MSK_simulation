@@ -261,7 +261,17 @@ class MusculoskeletalSimulation:
     def get_muscle_activations(self) -> np.ndarray:
         """Get current muscle activations"""
         return self.data.ctrl.copy()
-        
+
+    def get_muscle_forces_passive(self) -> np.ndarray:
+        """Get current muscle passive forces"""
+        act_original = self.data.act
+        self.data.act[:] = 0
+        mujoco.mj_forward(self.model.self.data)
+        f_muscle_passive = self.data.actuator_force.copy()
+        self.data.act = act_original
+        mujoco.mj_forward(self.model.self.data)
+        return f_muscle_passive
+
     def get_muscle_forces(self) -> np.ndarray:
         """Get current muscle forces"""
         return self.data.actuator_force.copy()

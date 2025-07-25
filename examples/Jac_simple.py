@@ -67,8 +67,8 @@ with mujoco.viewer.launch_passive(
             current_time = viz.sim.data.time
 
             current_pose = viz.sim.data.qpos.copy() 
-            viz.sim.data.qpos = np.clip(current_pose + (np.random.rand(len(viz.sim.data.qpos))-0.5)*np.pi /180,
-                                        sim.model.jnt_range[:,0],sim.model.jnt_range[:,1])
+            # viz.sim.data.qpos = np.clip(current_pose + (np.random.rand(len(viz.sim.data.qpos))-0.5)*np.pi /180,
+            #                             sim.model.jnt_range[:,0],sim.model.jnt_range[:,1])
 
             sim.step(np.zeros(sim.model.nu))
 

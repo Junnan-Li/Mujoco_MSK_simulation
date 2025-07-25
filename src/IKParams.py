@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
-
+from typing import Dict
 
 @dataclass
 class IK_Params:
@@ -14,5 +14,5 @@ class IK_Params:
 
 
 class IK_Target:
-    target_pos: np.ndarray
-    target_quat: np.ndarray
+    site_targets: Dict[str,np.ndarray] = field(default_factory=dict)
+

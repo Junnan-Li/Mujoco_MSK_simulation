@@ -41,7 +41,7 @@ class MusculoskeletalVisualizer:
         if  self.viewer:
 
             # frame 
-            self.viewer.opt.frame = True
+            self.viewer.opt.frame = False
             
             # viewer opt settings
             # self.viewer.opt.geomgroup[1] = False
@@ -50,7 +50,7 @@ class MusculoskeletalVisualizer:
                 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = 1       # Show textures
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 1         # Show joints
+            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_JOINT] = 0         # Show joints
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CAMERA] = 1        # Hide cameras
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTUATOR] = 1      # Hide actuators
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTIVATION] = 1    # Hide activation
