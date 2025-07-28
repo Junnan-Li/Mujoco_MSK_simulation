@@ -22,31 +22,56 @@ class IK_Solver:
 
         self.target = target # target only has site_targets entity
         self.site_ids_targets_list = [
-            (mujoco.mj_name2id(self.model.model, mujoco.mjtObj.mjOBJ_SITE, name), target)
-            for name, target in self.target.site_targets]
-        
+            (mujoco.mj_name2id(self.MSKmodel.model, mujoco.mjtObj.mjOBJ_SITE, name), target)
+            for name, target in self.target.site_targets.items()]
 
 
     def get_site_Jac(self) -> np.ndarray:
         """calcualte and stack the Jacobian of target sites in terms of all joints.
-        
-            IK_Solver.ik_prm.trans_only: [3 x nsite, nv]
+            
+            Returns:
+            jacobian: np.ndarray
+                If trans_only is True: shape (nsite, 3, nv)
+                Else: shape (nsite, 6, nv), stacked position + rotation Jacobian
         """
-        jac = np.empty((6,self.MSKmodel.model.nv))
-        jac = []
-        for site_id, _ in self.site_ids_targets_list:
+
+        nsite = len(self.site_ids_targets_list)
+        if self.ik_prm.trans_only:
+            jacobian = np.zeros((nsite, 3, self.MSKmodel.model.nv))
+        else:
+            jacobian = np.zeros((nsite, 6, self.MSKmodel.model.nv))
+    
+        for i,(site_id, _) in self.site_ids_targets_list:
             jacp = np.zeros((3, self.MSKmodel.model.nv))  
             jacr = np.zeros((3, self.MSKmodel.model.nv))  
-            mujoco.mj_jacSite(self.model, self.data, jacp, jacr, site_id) 
+            mujoco.mj_jacSite(self.MSKmodel.model, self.MSKmodel.data, jacp, jacr, site_id) 
             if self.ik_prm.trans_only:
-                jac.append(np.vstack(jacp))
+                jacobian[i] = jacp
             else:
-                jac.append(np.vstack([jacp,jacr]))
-        return jac
+                jacobian[i] = np.vstack([jacp, jacr])
+        return jacobian
     
+
     def cal_error(self) -> np.ndarray:
-        """calculate the position/orientation error of sites"""
-        pass
+        """calculate the position/orientation error of sites
+         error: (N, 3) if translation-only, or (N, 6) if including rotation error
+        """
+        site_id = [x[0] for x in self.site_ids_targets_list]
+        current_pos = self.MSKmodel.data.site_xpos[site_id]
+        target_pos = np.stack([x[1] for x in self.site_ids_targets_list])
+        if self.ik_prm.tran_only:
+            return target_pos - current_pos
+        else:
+            error_list = []
+            for i, id in enumerate(site_id):
+                error_pos = target_pos[i,:3] - current_pos[i]
+                site_rotm = self.data.site_xmat[id].reshape(3, 3)
+                target_rotm = R.from_euler('xyz', target_pos[i,3:6]).as_matrix()
+                error_rotm = target_rotm @ site_rotm.T
+                error_rotv = R.from_matrix(error_rotm).as_rotvec()
+                error_i = np.concatenate([error_pos, error_rotv])
+                error_list.append(error_i)
+            return np.vstack(error_list)
 
 
 

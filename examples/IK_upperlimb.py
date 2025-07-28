@@ -5,6 +5,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.MSK_Model import MusculoskeletalSimulation, ControlMode
 from src.visualizer import MusculoskeletalVisualizer
+from src.IKParams import IK_Params, IK_Target
+from src.IK_Solver import IK_Solver
 # import matplotlib.pyplot as plt
 import mujoco
 import time
@@ -44,15 +46,22 @@ qvel = sim.get_joint_velocities()
 qtorque = sim.get_joint_torques()
 
 
-joint_names =  ['mcp2_flexion','mcp2_abduction','pm2_flexion','md2_flexion']
+# joint_names =  ['mcp2_flexion','mcp2_abduction','pm2_flexion','md2_flexion']
 
-index = [i for i in range(38) if i < 10 or i > 17]
-jnt_lock_names = []
-for i in index:
-    jnt_lock_names.append(sim.joint_names[i])
-jnt_lock_values = np.zeros(len(jnt_lock_names))
-sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
+# index = [i for i in range(38) if i < 10 or i > 17]
+# jnt_lock_names = []
+# for i in index:
+#     jnt_lock_names.append(sim.joint_names[i])
+# jnt_lock_values = np.zeros(len(jnt_lock_names))
+# sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
+# IFtip
+IK_target = IK_Target()
+IK_target.site_targets = {'IFtip':np.array([1,1,1]),
+                          'MFtip':np.array([1,1,1])}
+
+
+iksol = IK_Solver(MSK_model=sim,target=IK_target)
 
 sim.integrate = True
 duration = 5
