@@ -57,8 +57,10 @@ qtorque = sim.get_joint_torques()
 
 # IFtip
 IK_target = IK_Target()
-IK_target.site_targets = {'IFtip':np.array([1,1,1]),
-                          'MFtip':np.array([1,1,1])}
+IK_target.site_targets = {'IFtip':np.array([1,1,1,0.2,0.2,0.2]),
+                          'MFtip':np.array([1,1,1,0.3,0.3,0.3]),
+                          'RFtip':np.array([1,1,1,0.4,0.4,0.4]),
+                          'LFtip':np.array([1,1,1,0.5,0.5,0.5])}
 
 
 iksol = IK_Solver(MSK_model=sim,target=IK_target)
@@ -89,7 +91,7 @@ with mujoco.viewer.launch_passive(
                                         sim.model.jnt_range[:,0],sim.model.jnt_range[:,1])
 
             sim.step(np.zeros(sim.model.nu))
-
+            iksol.cal_error()
             viz.viewer.user_scn.ngeom = 0
             viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
 
