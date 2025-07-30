@@ -295,7 +295,13 @@ class MusculoskeletalSimulation:
     def get_joint_torques(self) -> np.ndarray:
         """Get current joint torques"""
         return self.data.qfrc_actuator.copy()
-        
+
+    def get_site_pos(self, site_name: str) -> np.ndarray:
+        """Get site position and orientation as 6d vector"""
+        site_pos = self.data.site(site_name).xpos.copy()  
+        site_ori_xyz = R.from_matrix(self.data.site(site_name).xmat.copy().reshape(3,3)).as_euler("xyz")
+        return np.hstack([site_pos,site_ori_xyz])
+
     def get_end_effector_pos(self, body_name: str) -> np.ndarray:
         """Get end effector position"""
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)

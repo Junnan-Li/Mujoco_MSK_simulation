@@ -11,7 +11,7 @@ from src.IK_Solver import IK_Solver
 import mujoco
 import time
 import itertools
-
+from scipy.spatial.transform import Rotation as R
 
 
 # Initialize simulation with MyoSuite-style model
@@ -55,15 +55,27 @@ qtorque = sim.get_joint_torques()
 # jnt_lock_values = np.zeros(len(jnt_lock_names))
 # sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
-# IFtip
-IK_target = IK_Target()
-IK_target.site_targets = {'IFtip':np.array([1,1,1,0.2,0.2,0.2]),
-                          'MFtip':np.array([1,1,1,0.3,0.3,0.3]),
-                          'RFtip':np.array([1,1,1,0.4,0.4,0.4]),
-                          'LFtip':np.array([1,1,1,0.5,0.5,0.5])}
 
+# set desired pos
+
+viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
+q_desired = viz.sim.data.qpos.copy()
+mujoco.mj_forward(sim.model, sim.data)
+
+
+IK_target = IK_Target()
+# IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
+#                           'MFtip':sim.get_site_pos('MFtip'),
+#                           'RFtip':sim.get_site_pos('RFtip'),
+#                           'LFtip':sim.get_site_pos('LFtip')}
+IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
+                          'MFtip':sim.get_site_pos('MFtip')}
 
 iksol = IK_Solver(MSK_model=sim,target=IK_target)
+
+
+viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
+mujoco.mj_forward(sim.model, sim.data)
 
 sim.integrate = True
 duration = 5
@@ -92,6 +104,7 @@ with mujoco.viewer.launch_passive(
 
             sim.step(np.zeros(sim.model.nu))
             iksol.cal_error()
+            iksol.solve()
             viz.viewer.user_scn.ngeom = 0
             viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
 
@@ -100,8 +113,6 @@ with mujoco.viewer.launch_passive(
             # print(viz.viewer.user_scn.ngeom)
             # Render
             viz.render()
-            # print(sim.model.jnt_range[:3])
-            # print(sim.data.qpos[:3])
 
             elapsed = time.time() - start_time
             sim_time = sim.data.time - sim_start_time

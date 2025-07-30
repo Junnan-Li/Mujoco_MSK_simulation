@@ -18,7 +18,7 @@ class IK_Solver:
         self.MSKmodel = MSK_model
 
         self.ik_prm = IK_Params()
-        self.IK_method = IK_Algorithm.Levenburg_Marquadt
+        self.IK_method = IK_Algorithm.Newton_Raphson
 
         self.target = target # target only has site_targets entity
         self.site_ids_targets_list = [
@@ -98,19 +98,25 @@ class IK_Solver:
             mujoco.mj_forward(self.MSKmodel.model, self.MSKmodel.data)
 
             error = self.cal_error() # 
-
+            print(f"error: {error}")
+            
             if np.linalg.norm(error[:,:3]) < self.ik_prm.tol_pos and np.linalg.norm(error[:,3:]) < self.ik_prm.tol_rot: # TODO
                 return True
             error_cat = np.concatenate(error)
-            jac = self.get_site_Jac
+            jac = self.get_site_Jac()
             
-            match self.IK_method:
+            match self.IK_method.value:
                 case 0: # Newton-Raphson
-                    pass
+                    dq = np.linalg.pinv(jac) @ error_cat
+                    self.MSKmodel.data.qpos[:] += dq
+                    self.MSKmodel.data.qvel[:] = 0 
                 case 1: # Gauss-Newton
                     pass
                 case 2: # Levenburg-Marquadt
                     pass
+
+
+        
 
             
 
