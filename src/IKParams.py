@@ -14,5 +14,8 @@ class IK_Params:
 
 
 class IK_Target:
+    # 6 dimensional vector [pos ori]
+    # translational position
+    # euler angle xyz as rotation 
     site_targets: Dict[str,np.ndarray] = field(default_factory=dict)
 

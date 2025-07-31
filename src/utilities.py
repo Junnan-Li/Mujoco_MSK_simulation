@@ -1,17 +1,19 @@
 import mujoco
 import mujoco.viewer
 import numpy as np
-from typing import List
+# from typing import List
 from scipy.spatial.transform import Rotation as R
 
-def draw_frame(viewer: mujoco.viewer, origin:np.ndarray, rotv:np.ndarray, AxisLen: float=0.1):
-                #    pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
+def draw_frame(viewer: mujoco.viewer, 
+               origin:np.ndarray, 
+               rotv:np.ndarray,  # rotation vector
+               AxisLen: float=0.1):
         """Draw RGB axis lines at given position and orientation."""
         pass
         colors = [(1, 0, 0, 1),  # X - red
                 (0, 1, 0, 1),  # Y - green
                 (0, 0, 1, 1)]  # Z - blue
-        rotm = R.from_vector(rotv).as_matrix()        
+        rotm = R.from_rotvec(rotv).as_matrix()        
         for i in range(3):
             # add one user_scn.geom
             viewer.user_scn.ngeom += 1

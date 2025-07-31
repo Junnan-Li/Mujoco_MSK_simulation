@@ -44,7 +44,7 @@ class MusculoskeletalVisualizer:
             self.viewer.opt.frame = False
             
             # viewer opt settings
-            # self.viewer.opt.geomgroup[1] = False
+            self.viewer.opt.geomgroup[1] = False
             self.viewer.opt.sitegroup[2] = True
             # self.viewer.opt.tendongroup[0] = False
                 
@@ -97,7 +97,6 @@ class MusculoskeletalVisualizer:
             
     # @staticmethod
     def draw_site_frame(self, site_names: List[str]=[], AxisLen: float=0.1):
-                #    pos:np.ndarray ,xmat:np.ndarray, AxisLen: float=0.1):
         """Draw RGB axis lines at given position and orientation."""
         pass
         colors = [(1, 0, 0, 1),  # X - red

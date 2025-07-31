@@ -2,9 +2,14 @@ import numpy as np
 import mujoco
 from enum import Enum
 from scipy.spatial.transform import Rotation as R
+from typing import Optional
 
 from src.MSK_Model import MusculoskeletalSimulation
 from src.IKParams import IK_Params, IK_Target
+from src.visualizer import MusculoskeletalVisualizer
+
+import src.utilities as ut 
+
 
 
 class IK_Algorithm(Enum):
@@ -14,7 +19,10 @@ class IK_Algorithm(Enum):
 
 class IK_Solver:
     """ A class for solving inverse kinematic problem of MSK model"""
-    def __init__(self, MSK_model:MusculoskeletalSimulation, target: IK_Target):
+    def __init__(self, 
+                 MSK_model:MusculoskeletalSimulation, 
+                 target: IK_Target,
+                 viz: Optional['MusculoskeletalVisualizer'] = None):
         self.MSKmodel = MSK_model
 
         self.ik_prm = IK_Params()
@@ -25,6 +33,7 @@ class IK_Solver:
             (mujoco.mj_name2id(self.MSKmodel.model, mujoco.mjtObj.mjOBJ_SITE, name), target)
             for name, target in self.target.site_targets.items()]
         self.nsite = len(self.site_ids_targets_list)
+        self.viz = viz
 
     def get_site_Jac(self) -> np.ndarray:
         """calcualte and stack the Jacobian of target sites in terms of all joints.
@@ -95,7 +104,8 @@ class IK_Solver:
         for iter in range(self.ik_prm.max_iter):
             
             # mujoco.mj_fwdPosition(self.model, self.data)
-            mujoco.mj_forward(self.MSKmodel.model, self.MSKmodel.data)
+            # mujoco.mj_forward(self.MSKmodel.model, self.MSKmodel.data)
+            mujoco.mj_step1(self.MSKmodel.model, self.MSKmodel.data)
 
             error = self.cal_error() # 
             print(f"error: {error}")
@@ -115,6 +125,8 @@ class IK_Solver:
                 case 2: # Levenburg-Marquadt
                     pass
 
+            self.viz.draw_site_frame([name for name in self.target.site_targets.keys()])            
+            self.viz.render()
 
         
 

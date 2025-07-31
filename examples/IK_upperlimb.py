@@ -12,7 +12,7 @@ import mujoco
 import time
 import itertools
 from scipy.spatial.transform import Rotation as R
-
+import src.utilities as ut
 
 # Initialize simulation with MyoSuite-style model
 sim = MusculoskeletalSimulation('./models/myo_sim/arm/myoarm.xml')
@@ -60,7 +60,7 @@ qtorque = sim.get_joint_torques()
 
 viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
 q_desired = viz.sim.data.qpos.copy()
-mujoco.mj_forward(sim.model, sim.data)
+mujoco.mj_step1(sim.model, sim.data)
 
 
 IK_target = IK_Target()
@@ -71,11 +71,11 @@ IK_target = IK_Target()
 IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
                           'MFtip':sim.get_site_pos('MFtip')}
 
-iksol = IK_Solver(MSK_model=sim,target=IK_target)
+iksol = IK_Solver(MSK_model=sim,target=IK_target,viz=viz)
 
 
 viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
-mujoco.mj_forward(sim.model, sim.data)
+mujoco.mj_step1(sim.model, sim.data)
 
 sim.integrate = True
 duration = 5
@@ -93,6 +93,13 @@ with mujoco.viewer.launch_passive(
         sim_start_time = viz.sim.data.time
         last_log_time = 0
         
+        for site_pos in IK_target.site_targets.values():
+            ut.draw_frame(viz.viewer,
+                          site_pos[:3],
+                          R.from_euler('xyz',site_pos[3:]).as_rotvec(),
+                          AxisLen=0.2
+                        )
+        viz.render()
         # print(viz.viewer.opt.flags)
         while viz.viewer.is_running() and (viz.sim.data.time - sim_start_time) < duration:
             # Get control input
