@@ -3,11 +3,11 @@ import mujoco
 from enum import Enum
 from scipy.spatial.transform import Rotation as R
 from typing import Optional
+from dataclasses import dataclass, field
 
 from src.MSK_Model import MusculoskeletalSimulation
 from src.IKParams import IK_Params, IK_Target
 from src.visualizer import MusculoskeletalVisualizer
-
 import src.utilities as ut 
 
 
@@ -16,6 +16,13 @@ class IK_Algorithm(Enum):
     Newton_Raphson = 0          
     Gauss_Newton = 1         
     Levenburg_Marquadt = 2        
+
+@dataclass
+class IK_results:
+    iter: int = 0
+    qpos: np.ndarray = field(default_factory=lambda: np.array([])) 
+    site_error: np.ndarray = field(default_factory=lambda: np.array([])) 
+    status: int = 0
 
 class IK_Solver:
     """ A class for solving inverse kinematic problem of MSK model"""
@@ -34,6 +41,8 @@ class IK_Solver:
             for name, target in self.target.site_targets.items()]
         self.nsite = len(self.site_ids_targets_list)
         self.viz = viz
+
+        self.results = IK_results()
 
     def get_site_Jac(self) -> np.ndarray:
         """calcualte and stack the Jacobian of target sites in terms of all joints.
@@ -108,25 +117,41 @@ class IK_Solver:
             mujoco.mj_step1(self.MSKmodel.model, self.MSKmodel.data)
 
             error = self.cal_error() # 
-            print(f"error: {error}")
+            print(f"iter: {iter}  error: {error}")
             
             if np.linalg.norm(error[:,:3]) < self.ik_prm.tol_pos and np.linalg.norm(error[:,3:]) < self.ik_prm.tol_rot: # TODO
-                return True
+                self.results.iter = iter
+                self.results.qpos = self.MSKmodel.data.qpos.copy()
+                self.results.site_error = error
+                self.results.status = 1
+                return 
             error_cat = np.concatenate(error)
             jac = self.get_site_Jac()
             
             match self.IK_method.value:
                 case 0: # Newton-Raphson
                     dq = np.linalg.pinv(jac) @ error_cat
-                    self.MSKmodel.data.qpos[:] += dq
+                    qpos_new = self.MSKmodel.data.qpos[:] +dq
+                    self.MSKmodel.data.qpos[:] = np.clip(qpos_new,self.MSKmodel.model.jnt_range[:,0],self.MSKmodel.model.jnt_range[:,1])
                     self.MSKmodel.data.qvel[:] = 0 
                 case 1: # Gauss-Newton
                     pass
                 case 2: # Levenburg-Marquadt
-                    pass
+                    LM_w_e_all = np.eye(6*self.nsite) # 6nx6n
+                    g_i = jac.transpose() @ LM_w_e_all @ error_cat
+                    dq = np.linalg.pinv(jac.transpose() @ LM_w_e_all @ jac + self.ik_prm.LM_w_d*np.eye(self.MSKmodel.model.nv)) @ g_i
+                    qpos_new = self.MSKmodel.data.qpos[:] +dq
+                    self.MSKmodel.data.qpos[:] = np.clip(qpos_new,self.MSKmodel.model.jnt_range[:,0],self.MSKmodel.model.jnt_range[:,1])
+                    self.MSKmodel.data.qvel[:] = 0 
 
+                   
             self.viz.draw_site_frame([name for name in self.target.site_targets.keys()])            
             self.viz.render()
+
+        self.results.iter = iter
+        self.results.qpos = self.MSKmodel.data.qpos.copy()
+        self.results.site_error = error
+        self.results.status = 10 
 
         
 

@@ -9,7 +9,7 @@ class IK_Params:
     max_iter: int = 1000
     tol_pos: float = 1e-4
     tol_rot: float = 1e-3
-
+    LM_w_d: float = 1e-5
 
 
 

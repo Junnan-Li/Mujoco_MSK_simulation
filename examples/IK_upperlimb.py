@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.MSK_Model import MusculoskeletalSimulation, ControlMode
 from src.visualizer import MusculoskeletalVisualizer
 from src.IKParams import IK_Params, IK_Target
-from src.IK_Solver import IK_Solver
+from src.IK_Solver import IK_Solver, IK_Algorithm
 # import matplotlib.pyplot as plt
 import mujoco
 import time
@@ -58,10 +58,11 @@ qtorque = sim.get_joint_torques()
 
 # set desired pos
 
-viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
-q_desired = viz.sim.data.qpos.copy()
-mujoco.mj_step1(sim.model, sim.data)
+sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
 
+
+mujoco.mj_forward(sim.model, sim.data)
+q_desired = viz.sim.data.qpos.copy()
 
 IK_target = IK_Target()
 # IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
@@ -72,10 +73,10 @@ IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
                           'MFtip':sim.get_site_pos('MFtip')}
 
 iksol = IK_Solver(MSK_model=sim,target=IK_target,viz=viz)
+iksol.IK_method = IK_Algorithm.Levenburg_Marquadt
 
-
-viz.sim.data.qpos = np.random.rand(len(sim.data.qpos))
-mujoco.mj_step1(sim.model, sim.data)
+sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
+mujoco.mj_forward(sim.model, sim.data)
 
 sim.integrate = True
 duration = 5
@@ -106,12 +107,15 @@ with mujoco.viewer.launch_passive(
             current_time = viz.sim.data.time
 
             current_pose = viz.sim.data.qpos.copy() 
-            viz.sim.data.qpos = np.clip(current_pose + (np.random.rand(len(viz.sim.data.qpos))-0.5)*np.pi /180,
-                                        sim.model.jnt_range[:,0],sim.model.jnt_range[:,1])
+
+            sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
+            mujoco.mj_forward(sim.model, sim.data)
 
             sim.step(np.zeros(sim.model.nu))
             iksol.cal_error()
             iksol.solve()
+            print(f"status: {iksol.results.status}  iter: {iksol.results.iter}")
+
             viz.viewer.user_scn.ngeom = 0
             viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
 
