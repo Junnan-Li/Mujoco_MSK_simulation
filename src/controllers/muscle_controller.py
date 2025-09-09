@@ -8,22 +8,46 @@ class MuscleController:
     def __init__(self, model, data, params: Optional[Dict] = None):
         self.model = model
         self.data = data
-        
         if params is None:
             params = {}
-            
+        
+        """ 
         # Muscle activation parameters
         self.activation_dynamics = params.get('activation_dynamics', False)
         self.tau_act = params.get('tau_activation', 0.015)  # Activation time constant
         self.tau_deact = params.get('tau_deactivation', 0.060)  # Deactivation time constant
-        
+         """
+
+        # force controller parameters
+        self.P_force = 10
+
         # Muscle activation state
-        self.muscle_activations = np.zeros(model.nu)
-        self.muscle_excitations = np.zeros(model.nu)
-        
+        self.muscle_activations = self.data.act.copy()
+        self.muscle_excitations = self.data.ctrl.copy()
+        self.muscle_MIF = self.model.actuator_gainprm[:, 2].copy()
+
+
         # Muscle force scaling
         self.max_force_scaling = params.get('max_force_scaling', 1.0)
         
+    def apply_force_control(self, f_d: np.ndarray):
+        """
+        Muscle force controller
+        
+        Args:
+            f_d: desired muscle force vector 
+        """
+
+        f_current = self.data.actuator_force.copy()
+        f_error = -(f_d - f_current)
+        f_error_scaled = f_error / self.muscle_MIF
+
+        excitations = self.muscle_excitations + self.P_force * f_error_scaled
+        self.apply_control(excitations)
+
+
+
+
     def apply_control(self, excitations: np.ndarray):
         """
         Apply muscle excitation control with activation dynamics

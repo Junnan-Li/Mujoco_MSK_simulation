@@ -40,6 +40,7 @@ class MusculoskeletalSimulation:
         self.control_mode = None
         self.controller = None
         self.control_act_index = []
+        self.control_input = []
 
         # Store initial state
         self.initial_qpos = self.data.qpos.copy()
@@ -98,7 +99,7 @@ class MusculoskeletalSimulation:
             
         elif mode == ControlMode.JOINT:
             from src.controllers.joint_controller import JointController
-            self.controller = JointController(self.model, self.data, controller_params)
+            self.controller = JointController(self.model, self.data,controller_params)
             
         # elif mode == ControlMode.REFLEX:
         #     from controllers.reflex_controller import ReflexController
@@ -161,7 +162,7 @@ class MusculoskeletalSimulation:
             raise RuntimeError("Control mode not set. Call set_control_mode() first.")
             
         # Apply control through the controller
-        self.controller.apply_control(control_input)
+        self.controller.apply_force_control(control_input)
         
         if self.jnt_lock:
             # set qpos to desired value
@@ -203,49 +204,49 @@ class MusculoskeletalSimulation:
         return jac
 
 
-    def ik_site(self, site_name: str="", method: str="NR", target: IK_Target=IK_Target() ,ikprm: IK_Params=IK_Params()):
-        """
-        Inverse Kinematic of a site:
-            Methods 
-                Newton-Raphson
-                Gaussian-Newton
-                Levenburg-Marquadt
+    # def ik_site(self, site_name: str="", method: str="NR", target: IK_Target=IK_Target() ,ikprm: IK_Params=IK_Params()):
+    #     """
+    #     Inverse Kinematic of a site:
+    #         Methods 
+    #             Newton-Raphson
+    #             Gaussian-Newton
+    #             Levenburg-Marquadt
 
-            ikprm: IK parameters 
-        """
-        # check if site exists
-        site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
-        if  site_id == -1:
-            raise ValueError(f"Site '{site_name}' not found.")
+    #         ikprm: IK parameters 
+    #     """
+    #     # check if site exists
+    #     site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
+    #     if  site_id == -1:
+    #         raise ValueError(f"Site '{site_name}' not found.")
         
-        for iter in range(ikprm.max_iter):
-            mujoco.mj_forward(self.model, self.data)
+    #     for iter in range(ikprm.max_iter):
+    #         mujoco.mj_forward(self.model, self.data)
 
-            # calcualte error 
-            site_pos = self.data.site_xpos[site_id]
-            error_pos = target.target_pos - site_pos
+    #         # calcualte error 
+    #         site_pos = self.data.site_xpos[site_id]
+    #         error_pos = target.target_pos - site_pos
             
 
-            site_jac_all = self.get_site_Jac(site_name)
-            if ikprm.tran_only:
-                error_6D = error_pos
-                site_jac = site_jac_all[:3]
-            else:
-                site_rotm = self.data.site_xmat[site_id].reshape(3, 3)
-                target_rotm = R.from_quat(target.target_quat, scalar_first=True).as_matrix()
-                error_rotm = target_rotm @ site_rotm.T
-                error_rotv = R.from_matrix(error_rotm).as_rotvec()
-                error_6D = np.concatenate([error_pos.ravel(), error_rotv.ravel()])
-                site_jac = site_jac_all
+    #         site_jac_all = self.get_site_Jac(site_name)
+    #         if ikprm.tran_only:
+    #             error_6D = error_pos
+    #             site_jac = site_jac_all[:3]
+    #         else:
+    #             site_rotm = self.data.site_xmat[site_id].reshape(3, 3)
+    #             target_rotm = R.from_quat(target.target_quat, scalar_first=True).as_matrix()
+    #             error_rotm = target_rotm @ site_rotm.T
+    #             error_rotv = R.from_matrix(error_rotm).as_rotvec()
+    #             error_6D = np.concatenate([error_pos.ravel(), error_rotv.ravel()])
+    #             site_jac = site_jac_all
 
-            if np.linalg.norm(error_6D) < ikprm.tol:
-                pass
-                return True
+    #         if np.linalg.norm(error_6D) < ikprm.tol:
+    #             pass
+    #             return True
             
-            # match 
-            # delta_qpos = step_size * jac_full.T @ error_6d 
+    #         # match 
+    #         # delta_qpos = step_size * jac_full.T @ error_6d 
 
-        # pass
+    #     # pass
 
     def get_muscle_index(self, muscle_names: List[str]) -> np.ndarray:
         indices = []
@@ -260,7 +261,15 @@ class MusculoskeletalSimulation:
     # Musculoskeletal-specific getters
     def get_muscle_activations(self) -> np.ndarray:
         """Get current muscle activations"""
+        return self.data.act.copy()
+    
+    def get_muscle_excitations(self) -> np.ndarray:
+        """Get current muscle excitations"""
         return self.data.ctrl.copy()
+
+    def get_muscle_MIF(self) -> np.ndarray:
+            """Get muscle f0"""
+            return self.model.actuator_gainprm[:, 2].copy()
 
     def get_muscle_forces_passive(self) -> np.ndarray:
         """Get current muscle passive forces"""

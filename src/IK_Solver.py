@@ -117,7 +117,7 @@ class IK_Solver:
             mujoco.mj_step1(self.MSKmodel.model, self.MSKmodel.data)
 
             error = self.cal_error() # 
-            print(f"iter: {iter}  error: {error}")
+            # print(f"iter: {iter}  error: {error}")
             
             if np.linalg.norm(error[:,:3]) < self.ik_prm.tol_pos and np.linalg.norm(error[:,3:]) < self.ik_prm.tol_rot: # TODO
                 self.results.iter = iter
@@ -137,7 +137,7 @@ class IK_Solver:
                 case 1: # Gauss-Newton
                     pass
                 case 2: # Levenburg-Marquadt
-                    LM_w_e_all = np.eye(6*self.nsite) # 6nx6n
+                    LM_w_e_all = np.eye(6*self.nsite) * 1e-1 # 6nx6n
                     g_i = jac.transpose() @ LM_w_e_all @ error_cat
                     dq = np.linalg.pinv(jac.transpose() @ LM_w_e_all @ jac + self.ik_prm.LM_w_d*np.eye(self.MSKmodel.model.nv)) @ g_i
                     qpos_new = self.MSKmodel.data.qpos[:] +dq

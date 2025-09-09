@@ -55,6 +55,16 @@ qtorque = sim.get_joint_torques()
 # jnt_lock_values = np.zeros(len(jnt_lock_names))
 # sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
+paused = False
+quitt = False
+def key_callback(keycode):
+  if chr(keycode) == ' ':
+    global paused
+    paused = not paused
+  if chr(keycode) == 'k':
+    global quitt
+    quitt = not quitt
+
 
 # set desired pos
 
@@ -83,7 +93,8 @@ duration = 5
 with mujoco.viewer.launch_passive(
             sim.model, 
             sim.data,
-            show_left_ui=False,show_right_ui=False
+            show_left_ui=False,show_right_ui=False,
+            key_callback=key_callback
         ) as viz.viewer:
         viz._viewer_settings()
             
@@ -102,33 +113,34 @@ with mujoco.viewer.launch_passive(
                         )
         viz.render()
         # print(viz.viewer.opt.flags)
-        while viz.viewer.is_running() and (viz.sim.data.time - sim_start_time) < duration:
+        while viz.viewer.is_running() and not quitt and (viz.sim.data.time - sim_start_time) < duration:
             # Get control input
-            current_time = viz.sim.data.time
+            if not paused:
+                current_time = viz.sim.data.time
+                current_pose = viz.sim.data.qpos.copy() 
 
-            current_pose = viz.sim.data.qpos.copy() 
+                sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
+                mujoco.mj_forward(sim.model, sim.data)
 
-            sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
-            mujoco.mj_forward(sim.model, sim.data)
+                sim.step(np.zeros(sim.model.nu))
+                iksol.cal_error()
+                iksol.solve()
+                print(f"status: {iksol.results.status}  iter: {iksol.results.iter}")
+                print(f"status: {viz.sim.data.time - sim_start_time} ")
 
-            sim.step(np.zeros(sim.model.nu))
-            iksol.cal_error()
-            iksol.solve()
-            print(f"status: {iksol.results.status}  iter: {iksol.results.iter}")
+                viz.viewer.user_scn.ngeom = 0
+                viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
 
-            viz.viewer.user_scn.ngeom = 0
-            viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
+                # jac = sim.get_site_Jac('MFtip')
+                # viz.viewer.user_scn.ngeom = i
+                # print(viz.viewer.user_scn.ngeom)
+                # Render
+                viz.render()
 
-            jac = sim.get_site_Jac('MFtip')
-            # viz.viewer.user_scn.ngeom = i
-            # print(viz.viewer.user_scn.ngeom)
-            # Render
-            viz.render()
-
-            elapsed = time.time() - start_time
-            sim_time = sim.data.time - sim_start_time
-            if sim_time > elapsed:
-                time.sleep(sim_time - elapsed)
+                elapsed = time.time() - start_time
+                sim_time = sim.data.time - sim_start_time
+                if sim_time > elapsed:
+                    time.sleep(sim_time - elapsed)
 
 
 

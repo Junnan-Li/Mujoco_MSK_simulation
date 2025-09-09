@@ -244,10 +244,10 @@ class MusculoskeletalVisualizer:
             while self.viewer.is_running() and (self.sim.data.time - sim_start_time) < duration:
                 # Get control input
                 current_time = self.sim.data.time
-                control_input = control_function(current_time,self.sim)
+                self.sim.control_input = control_function(current_time,self.sim)
                 
                 # Step simulation
-                self.sim.step(control_input)
+                self.sim.step(self.sim.control_input)
 
                 # write to sim.record_
                 record_function(self.sim)

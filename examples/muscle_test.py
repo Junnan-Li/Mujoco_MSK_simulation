@@ -98,8 +98,8 @@ for i in range(sim.record_data["ctrl"].shape[1]):
 axes[0].grid(True)
 axes[0].legend()
 
-for i in range(sim.record_data["site_dis"].shape[1]):
-    axes[1].plot(sim.record_data['site_dis'], sim.record_data['mfrc'][:,i], label=f'mfrc')
+for i in range(sim.record_data["mfrc"].shape[1]):
+    axes[1].plot(sim.record_data['time'], sim.record_data['mfrc'][:,i], label=f'mfrc')
 
 plt.xlabel('site distance')
 plt.ylabel('mscule force')
