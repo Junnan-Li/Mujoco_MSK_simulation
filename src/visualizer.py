@@ -4,6 +4,8 @@ import numpy as np
 from typing import Optional, Callable, List
 import time
 from src.MSK_Model import MusculoskeletalSimulation
+from scipy.spatial.transform import Rotation as R
+import src.utilities as ut
 
 class MusculoskeletalVisualizer:
     """Enhanced visualizer for musculoskeletal simulations with muscle activation display"""
@@ -129,12 +131,29 @@ class MusculoskeletalVisualizer:
                     from_=pos,
                     to=arrow_to)
 
-
+    def draw_body_frame(self, body_names: List[str]=[], AxisLen: float=0.1):
+        """Draw RGB axis lines at given position and orientation."""
+        pass
+        colors = [(1, 0, 0, 1),  # X - red
+                (0, 1, 0, 1),  # Y - green
+                (0, 0, 1, 1)]  # Z - blue
+        for name in body_names:
+            # check is site existed
+            body_id = mujoco.mj_name2id(self.sim.model, mujoco.mjtObj.mjOBJ_XBODY,name)
+            if  body_id == -1:
+                raise ValueError(f"Site '{name}' not found.")
+                
+            pos = self.sim.data.xpos[body_id]
+            rotm = self.sim.data.xmat[body_id].reshape(3, 3)
+            ut.draw_frame(self.viewer, 
+                origin=pos, 
+                rotv= R.from_matrix(rotm).as_rotvec(),  
+                AxisLen=AxisLen)
 
     def _update_muscle_colors(self):
         """Update muscle colors based on activation levels"""
         # get ctrl
-        excitation = self.sim.get_muscle_activations().reshape(-1, 1)
+        excitation = self.sim.get_muscle_excitations().reshape(-1, 1)
         num_excitation = excitation.shape[0]
         if num_excitation == self.sim.model.ntendon:
             # Color muscles based on activation (red = high activation, blue = low activation)

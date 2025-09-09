@@ -19,7 +19,7 @@ class MuscleController:
          """
 
         # force controller parameters
-        self.P_force = 10
+        self.P_force = 0.4
 
         # Muscle activation state
         self.muscle_activations = self.data.act.copy()
@@ -39,7 +39,7 @@ class MuscleController:
         """
 
         f_current = self.data.actuator_force.copy()
-        f_error = -(f_d - f_current)
+        f_error = (f_d + f_current)
         f_error_scaled = f_error / self.muscle_MIF
 
         excitations = self.muscle_excitations + self.P_force * f_error_scaled

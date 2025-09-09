@@ -30,8 +30,8 @@ sim.set_control_mode(ControlMode.MUSCLE, muscle_params)
 viz = MusculoskeletalVisualizer(sim, azimuth=180, elevation=0,distance=0.1,lookat=[0.4, -0.25, 1.5])
 
 
-# muscle_names =  ['FDS2','FDP2','EDC2','EIP']
-muscle_names =  ['FDS2']
+muscle_names =  ['FDS2','FDP2','EDC2','EIP']
+# muscle_names =  ['FDS2']
 sim.control_act_index = sim.get_muscle_index(muscle_names)
 
 joint_fixed = []
@@ -53,11 +53,11 @@ def muscle_force_pattern(t:int, model:MusculoskeletalSimulation):
     if len(model.control_act_index)>0:
         for i in model.control_act_index:
             phase = 2 * np.pi * (i / model.control_act_index.shape[0] + wave_speed * t)
-            f_desired[i] = np.clip(-50 - 30 * np.sin(phase), -f_MIF[i], 0.0)
+            f_desired[i] = np.clip (30 +  5 * np.sin(phase), 0, f_MIF[i])
             # excitations[i] = np.clip(0.3 + 0.5 * np.random.rand(), 0.0, 1.0)
             # excitations[i] = 0.2
         
-    return np.clip(f_desired, -f_MIF, 10.0)
+    return np.clip(f_desired, 0, f_MIF)
 
 def log_data_runtime(model:MusculoskeletalSimulation):
     activations = model.get_muscle_activations()
@@ -85,7 +85,7 @@ def record_data_runtime(model:MusculoskeletalSimulation):
     model.record_data["qvel"].append(model.data.qvel.copy())
     model.record_data["ctrl"].append(model.data.ctrl.copy())
     model.record_data["act"].append(model.data.act.copy())
-    model.record_data["mfrc"].append(model.data.actuator_force.copy())
+    model.record_data["mfrc"].append(-model.data.actuator_force.copy())
     model.record_data["dfrc"].append(model.control_input.copy())
 
 # Run simulation
@@ -108,7 +108,6 @@ viz.run_simulation(muscle_force_pattern,
 fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 # for i in range(sim.record_data["qpos"].shape[1]):
 axes[0].plot(sim.record_data['time'], sim.record_data['mfrc'][:, sim.control_act_index ], label=f'mfrc[{sim.control_act_index }]')
-axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
 axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
 axes[0].grid(True)
 axes[0].legend()
