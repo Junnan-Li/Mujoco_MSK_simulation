@@ -50,6 +50,8 @@
                         <geom mesh="ulna" name="ulna" type="mesh"/>
                         <inertial pos="0.00971783 -0.0959509 0.024286" mass="1.1053" fullinertia="0.00541309 0.00115318 0.00494361 0.00031686 -7.615e-05 0.00109169"/>
                         <geom name="PQ2_wrap" pos="-0.0012 -0.2092 0.0428" quat="0.540178 0.481989 -0.422693 0.545183" class="wrap" size="0.007 0.005" type="cylinder"/>
+                        <!-- ======= markers on the ulna 1 ======= -->
+                        <site name="marker_ul1" class="marker" pos="-0.018 -0.24 0.05"></site>
                         <site name="ECU-P2" pos="-0.0139 -0.032 0.0295"/>
                         <site name="ECU-P3" pos="-0.017 -0.0543 0.0287"/>
                         <site name="ECU-P4" pos="-0.0179 -0.0957 0.0328"/>
@@ -80,6 +82,8 @@
                           <geom class="skin" size="0.02" fromto="-.01 0 -.010 0.015 -0.24 0.025"/>
                           <geom mesh="radius" name="radius" type="mesh"/>
                           <inertial pos="0.0336341 -0.181559 0.0156" mass="0.23359" fullinertia="0.00043855 8.859e-05 0.00040258 3.014e-05 -4.24e-06 6.418e-05"/>
+                          <!-- ======= markers on the radius 1 ======= -->
+                          <site name="marker_rad1" class="marker" pos="0.05 -0.23 0.025"></site>
                           <geom name="SUP_wrap" pos="0.0045 -0.0437 0.0059" quat="0.348354 0.118086 0.653837 -0.661213" class="wrap" size="0.008 0.02" type="cylinder"/>
                           <geom name="PQ1_wrap" pos="0.0281 -0.1986 0.0288" quat="0.15975 -0.156797 -0.702725 -0.675331" class="wrap" size="0.01 0.005" type="cylinder"/>
                           <geom name="ECU_torus_wrap" pos="-0.0163 -0.2417 0.0349" quat="0.868975 -0.476593 -0.0126204 0.132601" class="wrap" size="0.003"/>
@@ -228,6 +232,10 @@
                                   <geom mesh="1mc" name="1mc" type="mesh"/>
                                   <geom name="MPthumb_wrap" type="cylinder" size="0.0085 0.01" pos="0.0177 -0.0305 -0.0143" euler="0.32131512 0.11013028 -0.83479098" class="wrap"/>
                                   <inertial pos="0.0078 -0.0147 -0.006" mass="0.016" fullinertia="1.2e-06 7.1e-07 1.3e-06 4.7e-07 2.5e-07 -4.1e-07"/>
+                                  <!-- ======= markers on the MC 1 ======= -->
+                                  <site name="marker_mc1_1" class="marker" pos="0.013 -0.002 -0.009"></site>
+                                  <site name="marker_mc1_2" class="marker" pos="0.013 -0.005 0.006"></site>
+                                  <site name="marker_mc1_3" class="marker" pos="0.02 -0.013 -0.002"></site>
                                   <site name="EPL-P8" pos="0.0066 -0.0043 0.0079"/>
                                   <site name="EPL-P9" pos="0.0216 -0.0242 -0.0053"/>
                                   <site name="EPB-P6" pos="0.0144 -0.0034 -0.004"/>
@@ -252,6 +260,11 @@
                                     <geom mesh="thumbprox" name="thumbprox" type="mesh"/>
                                     <geom name="IPthumb_wrap" type="cylinder" size="0.00450000 0.005" pos="0.0121 -0.0302 -0.0096" euler="0.30473449 0.01291544 0.08796459" class="wrap"/>
                                     <inertial pos="0.0096 -0.0163 -0.0063" mass="0.0079" fullinertia="2.6e-07 7.1e-07 2.9e-07 1e-07 4e-08 -6e-08"/>
+                                    <!-- ======= markers on the PP 1 ======= -->
+                                    <site name="marker_pp1_1" class="marker" pos="0.014 -0.007 -0.007"></site>
+                                    <site name="marker_pp1_2" class="marker" pos="0.014 -0.01 0.003"></site>
+                                    <site name="marker_pp1_3" class="marker" pos="0.018 -0.019 -0.005"></site>
+
                                     <site name="EPL-P10" pos="0.0115 -0.0036 0.0016"/>
                                     <site name="EPL-P11" pos="0.0192 -0.0265 -0.0104"/>
                                     <site name="EPB-P8" pos="0.0093 -0.0062 -0.0056"/>
@@ -265,6 +278,8 @@
                                       <joint axis="-0.050102 -0.479623 0.876043" name="ip_flexion" pos="0 0 0" range="-1.309 0.436332"/>
                                       <geom mesh="thumbdist" name="thumbdist" type="mesh"/>
                                       <inertial pos="0.0056 -0.0104 -0.0044" mass="0.003" fullinertia="5e-08 3e-08 5e-08 1e-08 1e-08 -1e-08"/>
+                                      <!-- ======= markers on the DP 1 ======= -->
+                                      <site name="marker_dp1_1" class="marker" pos="0.015 -0.016 -0.005"></site>  
                                       <site name="EPL-P12" pos="0.0054 -0.0071 -0.0046"/>
                                       <site name="FPL-P11" pos="0.0024 -0.0113 -0.0041"/>
                                       <geom class="skin" type="ellipsoid" size=".007 .0055 .002" pos=".015 -.018 -.007" euler="0.2 1.57 1.5" rgba="1 1 1 .8"/>
@@ -288,6 +303,9 @@
                                 <geom mesh="2mc" name="2mc" type="mesh"/>
                                 <geom name="2ndmcp_ellipsoid_wrap" type="cylinder" size="0.0065 0.005" pos="0.0058 -0.0294 0.0007" euler="0.84927721 -1.33552594 1.33814394" class="wrap"/>
                                 <inertial pos="0 0 0" mass="0.02" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                <!-- ======= markers on the mc 2 ======= -->
+                                <site name="marker_mc2_1" class="marker" pos="0.003 -0.01 0.01"></site>
+                                <site name="marker_mc2_2" class="marker" pos="-0.003 0.01 0.01"></site>
                                 <!-- <site name="ECRL-P4" pos="0.0025 0.0164 0.0008"/>
                                 <site name="FCR-P3" pos="-0.0034 0.0192 -0.0092"/>
                                 <site name="FDS2-P4" pos="-0.003 0.001 -0.008"/>
@@ -330,6 +348,10 @@
                                   <geom mesh="2proxph" name="2proxph" type="mesh"/>
                                   <geom name="Secondpm_wrap" type="cylinder" size="0.0042 0.005" pos="0.0075 -0.0407 0.0061" euler="0.74193947 -1.47393055 0.70965087" class="wrap"/>
                                   <inertial pos="0 0 0" mass="0.01" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                  <!-- ======= markers on the PP 2 ======= -->
+                                  <site name="marker_pp2_1" class="marker" pos="0.007 -0.015 0.01"></site>
+                                  <site name="marker_pp2_2" class="marker" pos="-0.003 -0.015 0.01"></site>
+                                  <site name="marker_pp2_3" class="marker" pos="0.004 -0.03 0.01"></site>
                                   <!-- <site name="FDS2-P6" pos="0.001 -0.001 -0.009"/>
                                   <site name="FDS2-P7" pos="0.0064 -0.0368 0.0023"/>
                                   <site name="FDP2-P6" pos="0.001 -0.0134 -0.0095"/>
@@ -366,6 +388,11 @@
                                     <geom mesh="2midph" name="2midph" type="mesh"/>
                                     <geom name="Secondmd_wrap" pos="0.0036 -0.0243 0.0003" quat="0.749819 -0.0209733 -0.656264 0.0815428" class="wrap" size="0.003 0.005" type="cylinder"/>
                                     <inertial pos="0 0 0" mass="0.003" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                    <!-- ======= markers on the MP 2 ======= -->
+                                    <site name="marker_mp2_1" class="marker" pos="0.006 -0.007 0.01"></site>
+                                    <site name="marker_mp2_2" class="marker" pos="-0.003 -0.008 0.01"></site>
+                                    <site name="marker_mp2_3" class="marker" pos="0.003 -0.018 0.01"></site>
+
                                     <!-- <site name="FDS2-P8" pos="0.0013 -0.019 -0.0034"/>
                                     <site name="FDP2-P8" pos="0.0007 -0.0089 -0.0077"/>
                                     <site name="FDP2-P9" pos="0.001 -0.017 -0.005"/>
@@ -395,6 +422,9 @@
                                       <geom class="skin" size="0.007 0.008" pos="0.001 -0.008 0.00" euler="1.5 0.14 -.35"/>
                                       <geom mesh="2distph" name="2distph" type="mesh"/>
                                       <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                      <!-- ======= markers on the DP 2 ======= -->
+                                      <site name="marker_dp2_1" class="marker" pos="0.003 -0.02 0.01"></site>  
+
                                       <site name="FDP2-P10" pos="0.0007 -0.0056 -0.004"/>
                                       <site name="EDC2-P9" pos="0 -0.0056 0.0034"/>
                                       <site name="EIP-P10" pos="0.001 -0.004 0.003"/>
@@ -446,6 +476,11 @@
                                   <geom mesh="3proxph" name="3proxph" type="mesh"/>
                                   <geom name="Thirdpm_wrap" pos="0.0017 -0.0439 0.005" quat="0.700673 0.00645453 -0.712452 0.0377825" class="wrap" size="0.004 0.005" type="cylinder"/>
                                   <inertial pos="0 0 0" mass="0.01" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                  <!-- ======= markers on the PP 3 ======= -->
+                                  <site name="marker_pp3_1" class="marker" pos="0.006 -0.015 0.01"></site>
+                                  <site name="marker_pp3_2" class="marker" pos="-0.004 -0.015 0.01"></site>
+                                  <site name="marker_pp3_3" class="marker" pos="0.003 -0.03 0.01"></site>
+
                                   <!-- <site name="FDS3-P6" pos="0.0009 -0.017 -0.0128"/>
                                   <site name="FDS3-P7" pos="0.001 -0.038 -0.002"/>
                                   <site name="FDP3-P6" pos="0.0006 -0.0146 -0.0088"/>
@@ -476,6 +511,11 @@
                                     <geom mesh="3midph" name="3midph" type="mesh"/>
                                     <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
                                     <geom name="Thirdmd_wrap" pos="0.0014 -0.0289 0.0012" quat="0.708186 -0.0221627 -0.701515 0.0765368" class="wrap" size="0.003 0.005" type="cylinder"/>
+                                    <!-- ======= markers on the MP 3 ======= -->
+                                    <site name="marker_mp3_1" class="marker" pos="0.006 -0.007 0.01"></site>
+                                    <site name="marker_mp3_2" class="marker" pos="-0.003 -0.008 0.01"></site>
+                                    <site name="marker_mp3_3" class="marker" pos="0.003 -0.018 0.01"></site>
+
                                     <!-- <site name="FDS3-P8" pos="-0.001 -0.013 -0.006"/>
                                     <site name="FDP3-P8" pos="-0.0001 -0.0103 -0.0072"/>
                                     <site name="FDP3-P9" pos="0.0021 -0.0227 -0.0034"/>
@@ -495,7 +535,9 @@
                                       <joint axis="1 0 0" name="md3_flexion" pos="0 0 0" range="0 1.5708"/>
                                       <geom class="skin" size="0.007 0.008" pos="0.0013 -0.009 -.002" euler="1.6 .05 0"/>
                                       <geom mesh="3distph" name="3distph" type="mesh"/>
-                                    <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                      <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                      <!-- ======= markers on the DP 3 ======= -->
+                                      <site name="marker_dp3_1" class="marker" pos="0.003 -0.02 0.01"></site>  
                                       <site name="FDP3-P10" pos="0.0008 -0.004 -0.002"/>
                                       <site name="EDC3-P9" pos="0.0008 -0.0058 0.0041"/>
                                       <geom class="skin" type="ellipsoid" size=".0055 .008 .002" pos="0.002 -.019 0.003" euler="0.2 0 0.0" rgba="1 1 1 .8"/>
@@ -512,6 +554,10 @@
                                 <!-- <geom name="4thmcp_ellipsoid_wrap" pos="-0.00413111 -0.0311007 0.00480312" quat="0.562021 -0.225806 -0.785857 0.124787" class="wrap" size="0.00604155"/> -->
                                 <geom name="4thmcp_ellipsoid_wrap" type="cylinder" size="0.0065 0.005" pos="-0.0003 -0.0254 -0.0003" euler="-2.97212118 -1.22173048 -2.46318317" class="wrap"/>
                                 <inertial pos="0 0 0" mass="0.02" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                <!-- ======= markers on the mc 4 ======= -->
+                                <site name="marker_mc4_1" class="marker" pos="-0.002 -0.01 0.01"></site>
+                                <site name="marker_mc4_2" class="marker" pos="0.003 0.01 0.01"></site>
+
                                 <!-- <site name="FDS5-P4" pos="-0.0029 0.0085 -0.0121"/>
                                 <site name="FDS4-P5" pos="-0.0005 -0.0104 -0.0089"/>
                                 <site name="FDP5-P4" pos="-0.003 0.015 -0.013"/>
@@ -542,6 +588,11 @@
                                   <inertial pos="0 0 0" mass="0.01" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
                                   <!-- <geom name="Fourthpm_wrap" pos="-0.0033 -0.0401 -0.0001" quat="0.35623 -0.660837 -0.527455 0.397727" class="wrap" size="0.004 0.005" type="cylinder"/> -->
                                   <geom name="Fourthpm_wrap" type="cylinder" size="0.00400000 0.005" pos="-0.0033 -0.0401 -0.0001" euler="-3.02291026 -1.12311937 -1.27251956" class="wrap"/>
+                                  <!-- ======= markers on the PP 4 ======= -->
+                                  <site name="marker_pp4_1" class="marker" pos="0.004 -0.015 0.01"></site>
+                                  <site name="marker_pp4_2" class="marker" pos="-0.005 -0.015 0.01"></site>
+                                  <site name="marker_pp4_3" class="marker" pos="0.0 -0.03 0.01"></site>
+
                                   <!-- <site name="FDS4-P6" pos="0.0019 -0.02 -0.0049"/>
                                   <site name="FDS4-P7" pos="0.0011 -0.0331 -0.0063"/>
                                   <site name="FDP4-P6" pos="0.0018 -0.0199 -0.004"/>
@@ -573,6 +624,10 @@
                                     <geom mesh="4midph" name="4midph" type="mesh"/>
                                     <geom name="Fourthmd_wrap" type="cylinder" size="0.00300000 0.005" pos="-0.0021 -0.0247 -0.0001" euler="-3.02971705 -1.10287355 -2.87211382" class="wrap"/>
                                     <inertial pos="0 0 0" mass="0.003" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                    <!-- ======= markers on the MP 4 ======= -->
+                                    <site name="marker_mp4_1" class="marker" pos="0.004 -0.009 0.01"></site>
+                                    <site name="marker_mp4_2" class="marker" pos="-0.004 -0.009 0.01"></site>
+                                    <site name="marker_mp4_3" class="marker" pos="0.001 -0.02 0.01"></site>
                                     <!-- <site name="FDS4-P8" pos="-0.0009 -0.0147 -0.0021"/>
                                     <site name="FDP4-P8" pos="0.001 -0.009 -0.007"/>
                                     <site name="FDP4-P9" pos="-0.001 -0.018 -0.003"/>
@@ -594,6 +649,8 @@
                                       <geom class="skin" size="0.0068 0.008" pos="0.00 -0.01 -.002" euler="1.6 -.1 0"/>
                                       <geom mesh="4distph" name="4distph" type="mesh"/>
                                       <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                      <!-- ======= markers on the DP 4 ======= -->
+                                      <site name="marker_dp4_1" class="marker" pos="0.0 -0.018 0.01"></site>  
                                       <site name="FDP4-P10" pos="0.0002 -0.014 -0.0022"/>
                                       <site name="EDC4-P9" pos="-0.001 -0.008 0.003"/>
                                       <geom class="skin" type="ellipsoid" size=".005 .008 .002" pos="-.004 -.019 0.003" euler="0.2 -.5 0.0" rgba="1 1 1 .8"/>
@@ -637,6 +694,10 @@
                                   <geom mesh="5proxph" name="5proxph" type="mesh"/>
                                   <geom name="Fifthpm_wrap" pos="-0.0046 -0.0349 -0.0042" quat="0.4295 -0.0398509 -0.90052 -0.0548241" class="wrap" size="0.004 0.005" type="cylinder"/>
                                   <inertial pos="0 0 0" mass="0.005" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                  <!-- ======= markers on the PP 5 ======= -->
+                                  <site name="marker_pp5_1" class="marker" pos="0.002 -0.015 0.01"></site>
+                                  <site name="marker_pp5_2" class="marker" pos="-0.008 -0.013 0.01"></site>
+                                  <site name="marker_pp5_3" class="marker" pos="-0.003 -0.028 0.01"></site>
                                   <!-- <site name="FDS5-P6" pos="0.0018 -0.0143 -0.0055"/>
                                   <site name="FDS5-P7" pos="0.001 -0.021 -0.007"/>
                                   <site name="FDP5-P6" pos="-0.001 -0.018 -0.008"/>
@@ -671,6 +732,10 @@
                                     <geom mesh="5midph" name="5midph" type="mesh"/>
                                     <geom name="Fifthmd_wrap" pos="-0.0025 -0.0205 -0.0025" quat="0.35929 -0.0253303 -0.929016 -0.0848458" class="wrap" size="0.003 0.005" type="cylinder"/>
                                     <inertial pos="0 0 0" mass="0.002" fullinertia="0.0001 0.0001 0.0001 0 0 0"/>
+                                    <!-- ======= markers on the MP 5 ======= -->
+                                    <site name="marker_mp5_1" class="marker" pos="0.003 -0.006 0.01"></site>
+                                    <site name="marker_mp5_2" class="marker" pos="-0.007 -0.006 0.01"></site>
+                                    <site name="marker_mp5_3" class="marker" pos="-0.002 -0.015 0.01"></site>
                                     <site name="FDS5-P8" pos="0.0011 -0.0182 -0.0046"/>
                                     <site name="FDP5-P8" pos="-0.001 -0.009 -0.004"/>
                                     <site name="FDP5-P9" pos="-0.001 -0.016 -0.004"/>
@@ -686,6 +751,8 @@
                                       <geom class="skin" size="0.006 0.007" pos="-.0002 -0.009 -.002" euler="1.65 -.1 0"/>
                                       <geom mesh="5distph" name="5distph" type="mesh"/>
                                       <inertial pos="0 0 0" mass="0.001" fullinertia="0.0001 0.0001 0.0001 0 0 0"></inertial>
+                                      <!-- ======= markers on the DP 5 ======= -->
+                                      <site name="marker_dp5_1" class="marker" pos="-0.002 -0.018 0.01"></site>  
                                       <site name="FDP5-P10" pos="-0.0003 -0.0139 -0.0048"/>
                                       <site name="EDC5-P9" pos="-0.002 -0.007 0"/>
                                       <site name="EDM-P9" pos="-0.0023 -0.0033 0.0006"/>

@@ -42,6 +42,8 @@ class MusculoskeletalSimulation:
         self.control_act_index = []
         self.control_input = []
 
+        self.set_control_mode(ControlMode.MUSCLE)
+
         # Store initial state
         self.initial_qpos = self.data.qpos.copy()
         self.initial_qvel = self.data.qvel.copy()
@@ -92,7 +94,9 @@ class MusculoskeletalSimulation:
             controller_params: Parameters for the controller
         """
         self.control_mode = mode
-        
+        if controller_params is None:
+            controller_params = {}
+
         if mode == ControlMode.MUSCLE:
             from src.controllers.muscle_controller import MuscleController
             self.controller = MuscleController(self.model, self.data, controller_params)
@@ -257,6 +261,17 @@ class MusculoskeletalSimulation:
             except KeyError:
                 print(f"Muscle with name '{name}' does not exist")
         return np.array(indices, dtype=int)
+    
+    def get_body_index(self, body_names: List[str]) -> np.ndarray:
+        indices = []
+        for name in body_names:
+            try:
+                idx = self.model.body(name).id  
+                indices.append(idx)
+            except KeyError:
+                print(f"Muscle with name '{name}' does not exist")
+        return np.array(indices, dtype=int)
+
 
     # Musculoskeletal-specific getters
     def get_muscle_activations(self) -> np.ndarray:
@@ -293,6 +308,10 @@ class MusculoskeletalSimulation:
         """Get current muscle velocities"""
         return self.data.ten_velocity.copy()
         
+    def get_body_positions(self) -> np.ndarray:
+        """Get current joint positions"""
+        return self.data.xpos.copy()
+
     def get_joint_positions(self) -> np.ndarray:
         """Get current joint positions"""
         return self.data.qpos.copy()

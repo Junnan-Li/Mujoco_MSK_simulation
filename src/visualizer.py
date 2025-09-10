@@ -48,6 +48,7 @@ class MusculoskeletalVisualizer:
             # viewer opt settings
             self.viewer.opt.geomgroup[1] = False
             self.viewer.opt.sitegroup[2] = True
+            self.viewer.opt.sitegroup[5] = True
             # self.viewer.opt.tendongroup[0] = False
                 
             # self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONVEXHULL] = 0    # Show convex hulls
@@ -138,9 +139,10 @@ class MusculoskeletalVisualizer:
                 (0, 1, 0, 1),  # Y - green
                 (0, 0, 1, 1)]  # Z - blue
         for name in body_names:
-            # check is site existed
-            body_id = mujoco.mj_name2id(self.sim.model, mujoco.mjtObj.mjOBJ_XBODY,name)
+            # Need to check if mjOBJ_XBODY or mjOBJ_BODY should be used
+            body_id = mujoco.mj_name2id(self.sim.model, mujoco.mjtObj.mjOBJ_BODY,name)
             if  body_id == -1:
+                # check is site existed
                 raise ValueError(f"Site '{name}' not found.")
                 
             pos = self.sim.data.xpos[body_id]

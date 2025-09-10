@@ -27,8 +27,8 @@ class MuscleController:
         self.muscle_MIF = self.model.actuator_gainprm[:, 2].copy()
 
 
-        # Muscle force scaling
-        self.max_force_scaling = params.get('max_force_scaling', 1.0)
+        # # Muscle force scaling
+        # self.max_force_scaling = params.get('max_force_scaling', 1.0)
         
     def apply_force_control(self, f_d: np.ndarray):
         """

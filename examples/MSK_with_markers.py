@@ -12,16 +12,21 @@ import mujoco
 import time
 import itertools
 from scipy.spatial.transform import Rotation as R
+import src.utilities as ut
+
 
 # Initialize simulation with MyoSuite-style model
 sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand_markers.xml')
 
-viz = MusculoskeletalVisualizer(sim, azimuth=180, elevation=0,distance=0.1,lookat=[0.4, -0.25, 1.5])
+viz = MusculoskeletalVisualizer(sim, azimuth=0, elevation=0,distance=1,lookat=[0.3, -0.25, 1.5])
 
 
-body_names = ["secondmc"]
+body_names = ["radius","ulna","distal_thumb"]
+body_index = sim.get_body_index(body_names)
 
-duration = 5
+
+
+duration = 10
 with mujoco.viewer.launch_passive(
             sim.model, 
             sim.data,
@@ -41,13 +46,16 @@ with mujoco.viewer.launch_passive(
         while viz.viewer.is_running() and (viz.sim.data.time - sim_start_time) < duration:
             # Get control input
 
-
+            mujoco.mj_step1(sim.model, sim.data)
             viz.viewer.user_scn.ngeom = 0
 
+            # ut.draw_frame(viz.viewer, np.array([0, 0, 0]), np.array([0,0,0]), 0.2)
+            viz.draw_body_frame(["world"],1)
             viz.draw_body_frame(body_names=body_names)
             # viz.draw_site_frame(site_names=['IFtip', 'MFtip','RFtip'])
+            for body_i in range(len(body_names)):    
+                print(f"{body_names[body_i]} position: {sim.data.xpos[body_index[body_i]]}")
 
- 
             viz.render()
 
             elapsed = time.time() - start_time

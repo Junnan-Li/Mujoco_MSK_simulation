@@ -30,7 +30,7 @@
         <geom rgba=".5 .5 .9 1" group="3" contype="0" conaffinity="0"/>
       </default>
       <default class="marker">
-        <site size="0.002" rgba=".6 .6 .2 1" group="5"/>
+        <site size="0.004" rgba="1 0 0 1" group="5"/>
       </default>
       <default class="muscle">
         <muscle ctrllimited="true" ctrlrange="0 1" />
@@ -582,5 +582,17 @@
     <muscle name="LU_RB5" force="43.9208" range="0.604347 1.40177" lmin="0.503429" lmax="2.98253" fpmax="1.99901" tendon="LU_RB5_tendon" lengthrange="0.0906652 0.102627" class="muscle"/>
     <muscle name="UI_UB5" force="44.3878" range="0.754553 1.24692" lmin="0.571388" lmax="2.9994" fpmax="1.99511" tendon="UI_UB5_tendon" lengthrange="0.0902183 0.0976038"  class="muscle"/> -->
   </actuator>
+
+  <sensor>
+    <tendonpos name="Sensor_TP_FDS2" tendon="FDS2_tendon"/>
+    <tendonpos name="Sensor_TP_FDP2" tendon="FDP2_tendon"/>
+    <tendonpos name="Sensor_TP_EDC2" tendon="EDC2_tendon"/>
+    <tendonpos name="Sensor_TP_EIP"  tendon="EIP_tendon"/>
+    
+    <tendonactuatorfrc name="Sensor_TF_FDS2" tendon="FDS2_tendon"/>
+    <tendonactuatorfrc name="Sensor_TF_FDP2" tendon="FDP2_tendon"/>
+    <tendonactuatorfrc name="Sensor_TF_EDC2" tendon="EDC2_tendon"/>
+    <tendonactuatorfrc name="Sensor_TF_EIP"  tendon="EIP_tendon"/>
+  </sensor>
 
 </mujocoinclude>
