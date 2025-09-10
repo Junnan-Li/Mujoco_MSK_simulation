@@ -32,3 +32,29 @@ def draw_frame(viewer: mujoco.viewer,
                 width=0.02*AxisLen,
                 from_=origin,
                 to=arrow_to)
+            
+
+# double exponential joint stiffness torque 
+def tau_stiff_DE(q, A, B, C, D, E, F):
+    """
+    Double-Exponential passive joint torque
+    Input: 
+        q: joint angle in rad
+        A-F: parameters
+    Output:
+        tau: in Nm
+    """
+    Tau_stiff = (A * (np.exp(-B * (180*q/np.pi - E)) - 1.0) - C * (np.exp(D * (180*q/np.pi - F)) - 1.0)) /100
+    return Tau_stiff
+
+# joint damping
+def tau_damping(q_vel, k ):
+    """
+    linear joint damping torque
+    Input: 
+        q_vel: joint angle in rad/s
+        k: parameters
+    Output:
+        tau: in N/m/s
+    """
+    return -q_vel * k

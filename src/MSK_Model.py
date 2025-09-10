@@ -269,9 +269,18 @@ class MusculoskeletalSimulation:
                 idx = self.model.body(name).id  
                 indices.append(idx)
             except KeyError:
-                print(f"Muscle with name '{name}' does not exist")
+                print(f"Body with name '{name}' does not exist")
         return np.array(indices, dtype=int)
 
+    def get_jnt_index(self, joint_names: List[str]) -> np.ndarray:
+        indices = []
+        for name in joint_names:
+            try:
+                idx = self.model.joint(name).id  
+                indices.append(idx)
+            except KeyError:
+                print(f"Joint with name '{name}' does not exist")
+        return np.array(indices, dtype=int)
 
     # Musculoskeletal-specific getters
     def get_muscle_activations(self) -> np.ndarray:

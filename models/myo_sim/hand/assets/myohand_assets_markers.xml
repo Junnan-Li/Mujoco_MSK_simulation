@@ -593,6 +593,19 @@
     <tendonactuatorfrc name="Sensor_TF_FDP2" tendon="FDP2_tendon"/>
     <tendonactuatorfrc name="Sensor_TF_EDC2" tendon="EDC2_tendon"/>
     <tendonactuatorfrc name="Sensor_TF_EIP"  tendon="EIP_tendon"/>
+
+    <framepos name="M_mc21" objtype="site" objname="marker_mc2_1"/>
+    <framepos name="M_mc22" objtype="site" objname="marker_mc2_2"/>
+    <framepos name="M_mc41" objtype="site" objname="marker_mc4_1"/>
+    <framepos name="M_mc42" objtype="site" objname="marker_mc4_2"/>
+    <framepos name="M_pp21" objtype="site" objname="marker_pp2_1"/>
+    <framepos name="M_pp22" objtype="site" objname="marker_pp2_2"/>
+    <framepos name="M_pp23" objtype="site" objname="marker_pp2_3"/>
+    <framepos name="M_mp21" objtype="site" objname="marker_mp2_1"/>
+    <framepos name="M_mp22" objtype="site" objname="marker_mp2_2"/>
+    <framepos name="M_mp23" objtype="site" objname="marker_mp2_3"/>
+    <framepos name="M_dp21" objtype="site" objname="marker_dp2_1"/>
+
   </sensor>
 
 </mujocoinclude>
