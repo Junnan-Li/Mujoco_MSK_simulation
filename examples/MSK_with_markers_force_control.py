@@ -21,8 +21,8 @@ sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand_markers.xml')
 viz = MusculoskeletalVisualizer(sim, azimuth=0, elevation=0,distance=1,lookat=[0.3, -0.25, 1.5])
 
 # joint to be fixed 
-jnt_lock_names = ['pro_sup','flexion','deviation','mcp2_abduction']
-jnt_lock_values = np.array([0,0,0,0])
+jnt_lock_names = ['pro_sup','flexion','deviation'] #,'mcp2_abduction']
+jnt_lock_values = np.array([0,0,0])
 sim.lock_q_with_name(jnt_lock_names,jnt_lock_values)
 
 # passive joint torque
@@ -86,14 +86,14 @@ def record_data_runtime(model:MusculoskeletalSimulation):
         model.record_data = {
                 "time": [],
                 "qpos": [],
+                "ctrl": [],
                 "mfrc": [],
-                "mfrc_ss": [],
                 "AppliedF": []
             }
     model.record_data["time"].append(model.data.time)
     model.record_data["qpos"].append(model.data.qpos.copy())
+    model.record_data["ctrl"].append(model.data.ctrl.copy())
     model.record_data["mfrc"].append(-model.data.actuator_force.copy())
-    model.record_data["mfrc_ss"].append(-model.data.sensordata[4:8].copy())
     model.record_data["AppliedF"].append(model.data.qfrc_applied.copy())
 
 
@@ -104,16 +104,20 @@ viz.run_simulation(muscle_force_pattern,
                    log_interval=1.0)
 
 
-fig, axes = plt.subplots(3, 1, figsize=(10, 8))
+fig, axes = plt.subplots(4, 1, figsize=(10, 8))
 # for i in range(sim.record_data["qpos"].shape[1]):
-axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index ], linestyle='--', label=f'qpos[{jnt_passive_index }]')
+axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, 7:9], linestyle='-', label=f'qpos[{[7,8]}]')
 # axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
 axes[0].grid(True)
 axes[0].legend()
-axes[1].plot(sim.record_data['time'], sim.record_data['AppliedF'][:,jnt_passive_index], linestyle='-', label=f'AppliedF[{jnt_passive_index }]')
+axes[1].plot(sim.record_data['time'], sim.record_data['AppliedF'], linestyle='-')
 axes[1].grid(True)
 axes[1].legend()
-axes[2].plot(sim.record_data['time'], sim.record_data['mfrc_ss'], label=f'dfrc[{sim.control_act_index }]')
+axes[2].plot(sim.record_data['time'], sim.record_data['mfrc'][:,27])
+axes[2].grid(True)
+axes[2].legend()
+
+axes[3].plot(sim.record_data['time'], sim.record_data['ctrl'], label=f'ctrl[]')
 
 plt.xlabel('Time [s]')
 plt.ylabel('force')

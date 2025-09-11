@@ -33,7 +33,8 @@ class MusculoskeletalSimulation:
 
         # if joints are limited 
         self.jnt_lock = False
-        self.jnt_lock_id = []
+        self.jnt_lock_qposadf = []
+        self.jnt_lock_dofadf = []
         self.jnt_lock_value = []
 
         # Control mode and controller
@@ -134,7 +135,8 @@ class MusculoskeletalSimulation:
             joint_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, q_names[i])
             if joint_id == -1:
                 raise ValueError(f"Joint '{q_names[i]}' not found.")
-            self.jnt_lock_id.append(self.model.jnt_qposadr[joint_id])
+            self.jnt_lock_qposadf.append(self.model.jnt_qposadr[joint_id])
+            self.jnt_lock_dofadf.append(self.model.jnt_dofadr[joint_id])
             self.jnt_lock_value.append(q_values[i])
 
         self.jnt_lock = True
@@ -170,8 +172,18 @@ class MusculoskeletalSimulation:
         
         if self.jnt_lock:
             # set qpos to desired value
-            for i in range(len(self.jnt_lock_id)):
-                self.data.qpos[self.jnt_lock_id[i]] = self.jnt_lock_value[i]
+            for i in range(len(self.jnt_lock_qposadf)):
+                # self.data.qpos[self.jnt_lock_id[i]] = self.jnt_lock_value[i]
+
+                q_current = self.data.qpos[self.jnt_lock_qposadf[i]]
+                qd_current = self.data.qvel[self.jnt_lock_dofadf[i]]
+                q_locked = self.jnt_lock_value[i]
+                q_error = q_locked - q_current
+                tau_lock = 100*q_error - 0.2 * qd_current
+                self.data.qfrc_applied[self.jnt_lock_dofadf[i]] = tau_lock
+
+
+
 
         if self.integrate:
             #  Step the simulation
