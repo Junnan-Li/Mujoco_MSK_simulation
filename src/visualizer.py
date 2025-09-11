@@ -7,6 +7,8 @@ from src.MSK_Model import MusculoskeletalSimulation
 from scipy.spatial.transform import Rotation as R
 import src.utilities as ut
 
+import imageio
+
 class MusculoskeletalVisualizer:
     """Enhanced visualizer for musculoskeletal simulations with muscle activation display"""
     
@@ -250,6 +252,7 @@ class MusculoskeletalVisualizer:
             real_time: Whether to run in real time
             log_interval: Interval for logging muscle state
         """
+
         with mujoco.viewer.launch_passive(
             self.sim.model, 
             self.sim.data,
@@ -275,7 +278,7 @@ class MusculoskeletalVisualizer:
 
                 # Render
                 self.render()
-                
+
                 # Log muscle state
                 if current_time - last_log_time >= log_interval:
                     log_function(self.sim)
@@ -287,7 +290,6 @@ class MusculoskeletalVisualizer:
                     sim_time = self.sim.data.time - sim_start_time
                     if sim_time > elapsed:
                         time.sleep(sim_time - elapsed)
-            
             # transfer data to numpy array
             self.transfer_data_to_np()
                     

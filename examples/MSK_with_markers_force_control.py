@@ -18,7 +18,7 @@ import src.utilities as ut
 # Initialize simulation with MyoSuite-style model
 sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand_markers.xml')
 
-viz = MusculoskeletalVisualizer(sim, azimuth=0, elevation=0,distance=1,lookat=[0.3, -0.25, 1.5])
+viz = MusculoskeletalVisualizer(sim, azimuth=0, elevation=0,distance=1,lookat=[0.3, -0.5, 1.5])
 
 # joint to be fixed 
 jnt_lock_names = ['pro_sup','flexion','deviation'] #,'mcp2_abduction']
@@ -58,13 +58,15 @@ def muscle_force_pattern(t:int, model:MusculoskeletalSimulation):
     # Create wave-like activation pattern
     f_desired = np.zeros(n_muscles)
     # keep extension muscles stable forces
-    f_desired[sim.control_act_index[0:4]] = 0
+    f_desired[sim.control_act_index[0:4]] = 1.5
+    f_desired[sim.control_act_index[2]] = 4
 
     f_MIF = model.get_muscle_MIF() 
     # # Activate muscles in sequence
-    wave_speed = 0.5  # Hz
-    phase = 2 * np.pi *  wave_speed * t
-    # f_desired[sim.control_act_index[2]] = np.clip (20 +  18 * np.sin(phase), 0, f_MIF[sim.control_act_index[0]])
+    wave_speed = 0.3  # Hz
+    for i in range(2):
+        phase = 2 * np.pi * (i / 2 + wave_speed * t)
+        f_desired[sim.control_act_index[2*i]] += np.clip (5 +  5 * np.sin(phase), 0, f_MIF[sim.control_act_index[2*i]])
         
     return np.clip(f_desired, 0, f_MIF)
 
@@ -88,44 +90,69 @@ def record_data_runtime(model:MusculoskeletalSimulation):
                 "qpos": [],
                 "ctrl": [],
                 "mfrc": [],
-                "AppliedF": []
+                "tendon_pos" : [],
+                "AppliedF": [],
+                "marker_pos":[]
             }
     model.record_data["time"].append(model.data.time)
     model.record_data["qpos"].append(model.data.qpos.copy())
     model.record_data["ctrl"].append(model.data.ctrl.copy())
+    model.record_data["tendon_pos"].append(model.data.sensordata[0:4].copy())
     model.record_data["mfrc"].append(-model.data.actuator_force.copy())
     model.record_data["AppliedF"].append(model.data.qfrc_applied.copy())
+    model.record_data["marker_pos"].append(model.data.sensordata[8:].copy())
 
 
 viz.run_simulation(muscle_force_pattern,
                    log_function=log_data_runtime,
                    record_function=record_data_runtime,
-                   duration=5.0,
+                   duration=10.0,
                    log_interval=1.0)
 
 
-fig, axes = plt.subplots(4, 1, figsize=(10, 8))
-# for i in range(sim.record_data["qpos"].shape[1]):
-axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, 7:9], linestyle='-', label=f'qpos[{[7,8]}]')
+fig, axes = plt.subplots(3, 1, figsize=(10, 8))
+for i in range(jnt_passive_index.shape[0]):
+    axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index[i]], linestyle='-', label=f'{jnt_passive[i]}')
 # axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
+# axes[0].set_title("joint pos")
+axes[0].set_ylabel("joint pos [rad]")
 axes[0].grid(True)
 axes[0].legend()
-axes[1].plot(sim.record_data['time'], sim.record_data['AppliedF'], linestyle='-')
-axes[1].grid(True)
+for i in range(len(muscle_names)):
+    axes[1].plot(sim.record_data['time'], sim.record_data['mfrc'][:,sim.control_act_index[i]],label=f'{muscle_names[i]}')
+axes[1].grid(True) 
+axes[1].set_ylabel('tendon force [N]')
 axes[1].legend()
-axes[2].plot(sim.record_data['time'], sim.record_data['mfrc'][:,27])
+for i in range(len(muscle_names)):
+    axes[2].plot(sim.record_data['time'], sim.record_data['tendon_pos'][:,i],label=f'tendon length {muscle_names[i]}')
 axes[2].grid(True)
+axes[2].set_ylabel('tendon pos [m] ' )
 axes[2].legend()
 
-axes[3].plot(sim.record_data['time'], sim.record_data['ctrl'], label=f'ctrl[]')
+# axes[3].plot(sim.record_data['time'], sim.record_data['ctrl'], label=f'ctrl[]')
 
 plt.xlabel('Time [s]')
-plt.ylabel('force')
-plt.title('Joint Position over Time')
-plt.legend()
+# plt.ylabel('force')
+# plt.legend()
 plt.grid(True)
 # plt.tight_layout()
 plt.show()
 
 
+traj = sim.record_data['marker_pos'].reshape(sim.record_data['marker_pos'].shape[0], 7, 3)
+# Create 3D figure
+fig = plt.figure(2)
+ax = fig.add_subplot(111, projection="3d")
+for i in range(7):
+    ax.plot(traj[:, i, 0], traj[:, i, 1], traj[:, i, 2], label=f"Marker {i+1}")
+    ax.scatter(traj[0, i, 0], traj[0, i, 1], traj[0, i, 2], marker="o", s=50)  # start point
+    ax.scatter(traj[-1, i, 0], traj[-1, i, 1], traj[-1, i, 2], marker="x", s=50)  # end point
 
+# Labels
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_zlabel("Z")
+ax.set_title("3D Marker Trajectories")
+ax.legend()
+
+plt.show()

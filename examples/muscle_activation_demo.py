@@ -27,7 +27,7 @@ sim.set_control_mode(ControlMode.MUSCLE, muscle_params)
 # viewer.cam.distance = .1    # Zoom out
 # viewer.cam.lookat[:] = [0.4, -0.25, 1.5]  # Center on torso
 
-viz = MusculoskeletalVisualizer(sim, azimuth=180, elevation=0,distance=0.1,lookat=[0.4, -0.25, 1.5])
+viz = MusculoskeletalVisualizer(sim, azimuth=0, elevation=0,distance=1,lookat=[0.3, -0.25, 1.5])
 
 
 muscle_names =  ['FDS2','FDP2','EDC2','EIP']

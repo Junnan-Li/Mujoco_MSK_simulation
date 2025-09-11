@@ -601,10 +601,10 @@
     <framepos name="M_pp21" objtype="site" objname="marker_pp2_1"/>
     <framepos name="M_pp22" objtype="site" objname="marker_pp2_2"/>
     <framepos name="M_pp23" objtype="site" objname="marker_pp2_3"/>
-    <framepos name="M_mp21" objtype="site" objname="marker_mp2_1"/>
+    <!-- <framepos name="M_mp21" objtype="site" objname="marker_mp2_1"/>
     <framepos name="M_mp22" objtype="site" objname="marker_mp2_2"/>
     <framepos name="M_mp23" objtype="site" objname="marker_mp2_3"/>
-    <framepos name="M_dp21" objtype="site" objname="marker_dp2_1"/>
+    <framepos name="M_dp21" objtype="site" objname="marker_dp2_1"/> -->
 
   </sensor>
 
