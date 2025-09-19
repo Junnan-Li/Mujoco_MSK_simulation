@@ -1,11 +1,17 @@
 from dataclasses import dataclass, field
 import numpy as np
 from typing import Dict
+from enum import Enum
+
+class IK_Target_Mode(Enum):
+    trans_only = 1
+    rot_only = 2
+    trans_rot = 3
 
 @dataclass
 class IK_Params:
     
-    trans_only: bool = False
+    target_type: int = IK_Target_Mode.trans_rot.value
     max_iter: int = 1000
     tol_pos: float = 1e-4
     tol_rot: float = 1e-3

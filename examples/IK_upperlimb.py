@@ -38,7 +38,6 @@ print(f'{sim.joint_names}')
 # plot
 
 MSK_state = sim.get_musculoskeletal_state()
-
 muscle_activations = sim.get_muscle_activations()
 muscle_forces = sim.get_muscle_forces()
 qpos = sim.get_joint_positions()
@@ -82,7 +81,8 @@ IK_target = IK_Target()
 IK_target.site_targets = {'IFtip':sim.get_site_pos('IFtip'),
                           'MFtip':sim.get_site_pos('MFtip')}
 
-iksol = IK_Solver(MSK_model=sim,target=IK_target,viz=viz)
+iksol = IK_Solver(MSK_model=sim,viz=viz)
+iksol.set_target(IK_target)
 iksol.IK_method = IK_Algorithm.Levenburg_Marquadt
 
 sim.data.qpos = sim.model.jnt_range[:,0] + np.random.rand(len(sim.data.qpos))* (sim.model.jnt_range[:,1]-sim.model.jnt_range[:,0])
