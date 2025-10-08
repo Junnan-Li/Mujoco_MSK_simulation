@@ -33,15 +33,15 @@ momentarm = sim.get_muscle_moment_arms_curves(['mcp2_flexion'],['FDS2'] )
 q_deg = np.degrees(momentarm[:, 0])
 r = momentarm[:, 1]
 
-# Plot
-plt.figure(figsize=(6, 4))
-plt.plot(q_deg, r, linewidth=2)
-plt.xlabel(f"angle (deg)")
-plt.ylabel(f"FDS2 moment arm (m)")
-plt.title(f"Moment Arm Curve (Jacobian): FDS2 about MCP2")
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+# # Plot
+# plt.figure(figsize=(6, 4))
+# plt.plot(q_deg, r, linewidth=2)
+# plt.xlabel(f"angle (deg)")
+# plt.ylabel(f"FDS2 moment arm (m)")
+# plt.title(f"Moment Arm Curve (Jacobian): FDS2 about MCP2")
+# plt.grid(True)
+# plt.tight_layout()
+# plt.show()
 
 
 
@@ -80,9 +80,6 @@ def muscle_force_pattern(t:int, model:MusculoskeletalSimulation):
         tau_stiff = ut.tau_stiff_DE(q, A, B, C, D, E, F)
         tau_damp = ut.tau_damping(qdot, k)
         model.data.qfrc_applied[vadr] = tau_stiff + tau_damp
-
-
-    
 
     f_MIF = model.get_muscle_MIF() 
     # # Activate muscles in sequence
@@ -148,34 +145,49 @@ viz.run_simulation(muscle_force_pattern,
                    duration=30.0,
                    log_interval=1.0)
 
+# %%
 
-fig, axes = plt.subplots(3, 1, figsize=(10, 8))
-for i in range(jnt_passive_index.shape[0]):
-    axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index[i]], linestyle='-', label=f'{jnt_passive[i]}')
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+for i in range(len(muscle_names)):
+    axes[0].plot(sim.record_data['qpos'][:, jnt_passive_index[0]], sim.record_data['tendon_pos'][:,i], linestyle='-', label=f'tendon length {muscle_names[i]}')
 # axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
 # axes[0].set_title("joint pos")
 axes[0].set_ylabel("joint pos [rad]")
 axes[0].grid(True)
 axes[0].legend()
 for i in range(len(muscle_names)):
-    axes[1].plot(sim.record_data['time'], sim.record_data['mfrc'][:,sim.control_act_index[i]],label=f'{muscle_names[i]}')
-axes[1].grid(True) 
-axes[1].set_ylabel('tendon active forces [N]')
+    axes[1].plot(sim.record_data['qpos'][:, jnt_passive_index[0]], sim.record_data['tendon_pos'][:,i],label=f' {muscle_names[i]}')
+axes[1].grid(True)
+axes[1].set_ylabel('tendon pos [m] ' )
 axes[1].legend()
+plt.xlabel('q [rad]')
+# plt.ylabel('force')
+# plt.legend()
+plt.grid(True)
+# plt.tight_layout()
+# plt.show()
+
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+for i in range(jnt_passive_index.shape[0]):
+    axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index[i]], linestyle='-', label=f'tendon length {muscle_names[i]}')
+# axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
+# axes[0].set_title("joint pos")
+axes[0].set_ylabel("joint pos [rad]")
+axes[0].grid(True)
+axes[0].legend()
 for i in range(len(muscle_names)):
-    axes[2].plot(sim.record_data['time'], sim.record_data['tendon_pos'][:,i],label=f'tendon length {muscle_names[i]}')
-axes[2].grid(True)
-axes[2].set_ylabel('tendon pos [m] ' )
-axes[2].legend()
-
-# axes[3].plot(sim.record_data['time'], sim.record_data['ctrl'], label=f'ctrl[]')
-
-plt.xlabel('Time [s]')
+    axes[1].plot(sim.record_data['time'], sim.record_data['mfrc'][:,sim.control_act_index[i]],label=f' {muscle_names[i]}')
+axes[1].grid(True)
+axes[1].set_ylabel('tendon pos [m] ' )
+axes[1].legend()
+plt.xlabel('q [rad]')
 # plt.ylabel('force')
 # plt.legend()
 plt.grid(True)
 # plt.tight_layout()
 plt.show()
+
 
 # traj = sim.record_data['marker_pos'].reshape(sim.record_data['marker_pos'].shape[0], 7, 3)
 # # Create 3D figure
