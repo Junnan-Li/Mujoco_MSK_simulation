@@ -179,8 +179,8 @@ class MusculoskeletalSimulation:
                 qd_current = self.data.qvel[self.jnt_lock_dofadf[i]]
                 q_locked = self.jnt_lock_value[i]
                 q_error = q_locked - q_current
-                tau_lock = 100*q_error - 0.2 * qd_current
-                self.data.qfrc_applied[self.jnt_lock_dofadf[i]] = tau_lock
+                tau_lock = 5*q_error - 0.02 * qd_current
+                self.data.qfrc_applied[self.jnt_lock_dofadf[i]] = np.clip(tau_lock, -10, 10)
 
 
 
@@ -395,4 +395,41 @@ class MusculoskeletalSimulation:
                 # MuJoCo's tendon jacobian functionality
                 moment_arms[muscle_id, i] = self.data.ten_wrapadr[muscle_id] if muscle_id < len(self.data.ten_wrapadr) else 0.0
                 
+        return moment_arms
+    
+    def get_muscle_moment_arms_curves(self, joint_names: List[str], muscle_names: List[str]) -> np.ndarray:
+        """
+        Get muscle moment arms for specified joints
+        
+        Args:
+            joint_names: List of joint names
+            
+        Returns:
+            Matrix of moment arms [n_muscles x n_joints]
+        """
+        joint_ids = [mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name) 
+                    for name in joint_names]
+        
+        muscle_ids = self.get_muscle_index(muscle_names)
+
+        moment_arms = np.zeros([100, 2])
+        
+        for i, joint_id in enumerate(joint_ids):
+            # Range of joint motion
+            jnt_range = self.model.jnt(joint_id).range
+            q_samples = np.linspace(jnt_range[0], jnt_range[1], 100)
+            for k,muscle_id in enumerate(muscle_ids):
+                for j, q in enumerate(q_samples):
+                    self.data.qpos[:] = 0.0       # reset all joints to neutral
+                    self.data.qpos[self.model.jnt_qposadr[joint_id]] = q
+
+                    # Forward dynamics to update geometry & Jacobians
+                    mujoco.mj_forward(self.model, self.data)
+
+                    # The Jacobian d(L_tendon)/d(q)
+                    dL_dq = self.data.ten_J[muscle_id, joint_id]
+                    moment_arms[j,0] = q # negative by definition
+                    moment_arms[j,1] = -dL_dq  # negative by definition
+
+
         return moment_arms
