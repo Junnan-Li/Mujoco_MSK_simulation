@@ -7,6 +7,7 @@
 # The model is modified from Myohand by add markers and passive joint torques
 #
 
+
 import numpy as np
 import sys
 import os
@@ -22,7 +23,6 @@ import matplotlib.pyplot as plt
 # import itertools
 from scipy.spatial.transform import Rotation as R
 import src.utilities as ut
-
 
 # Initialize simulation with MyoSuite-style model
 sim = MusculoskeletalSimulation('./models/myo_sim/hand/myohand_markers.xml')
@@ -82,26 +82,34 @@ def muscle_force_pattern(t:int, model:MusculoskeletalSimulation):
         model.data.qfrc_applied[vadr] = tau_stiff + tau_damp
 
     f_MIF = model.get_muscle_MIF() 
+
+    # time settings
+    initial_time = 3 
+
     # # Activate muscles in sequence
     init_force = 3.0      # baseline force (N)
     step_interval = 1.5 # seconds per increment
     step_size = 1     # N per increment
-    time_inc = 10
-    max_force = init_force + time_inc * step_size   # N maximum
+    steps_increase = 10
+    max_force = init_force + steps_increase * step_size   # N maximum
 
     # Create wave-like activation pattern
     f_desired = np.zeros(n_muscles)
-    # keep extension muscles stable forces
-    f_desired[sim.control_act_index[0:4]] = init_force
-    f_desired[sim.control_act_index[2]] = 15
+    
 
-    # Compute current force level
-    step_index = int(t // step_interval)
-    # Reset when exceeding max_force
-    if step_index < time_inc:
-        f_desired[sim.control_act_index[0]] = init_force + step_size * step_index
-    else:
-        f_desired[sim.control_act_index[0]] = max_force - step_size * (step_index-time_inc)
+    if t < initial_time:
+        # keep extension muscles stable forces
+        f_desired[sim.control_act_index[0:4]] = init_force
+        f_desired[sim.control_act_index[2]] = 15
+    else:    
+        t_start = (t-initial_time)
+        # Compute current force level
+        step_index = int(t_start // step_interval)
+        # Reset when exceeding max_force
+        if step_index < steps_increase:
+            f_desired[sim.control_act_index[0]] = init_force + step_size * step_index
+        else:
+            f_desired[sim.control_act_index[0]] = max_force - step_size * (step_index-steps_increase)
 
 
     return np.clip(f_desired, 0, f_MIF)
@@ -115,8 +123,8 @@ def log_data_runtime(model:MusculoskeletalSimulation):
     
     # Print activation summary
     print(f"Time: {model.data.time:.3f}")
-    print(f"muscle activation: {activations}")
-    print(f"muscle force: {forces}")
+    # print(f"muscle activation: {activations}")
+    # print(f"muscle force: {forces}")
     print("---")
 
 def record_data_runtime(model:MusculoskeletalSimulation):
@@ -170,7 +178,7 @@ plt.grid(True)
 
 fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 for i in range(jnt_passive_index.shape[0]):
-    axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index[i]], linestyle='-', label=f'tendon length {muscle_names[i]}')
+    axes[0].plot(sim.record_data['time'], sim.record_data['qpos'][:, jnt_passive_index[i]], linestyle='.', label=f'tendon length {muscle_names[i]}')
 # axes[0].plot(sim.record_data['time'], sim.record_data['dfrc'][:, sim.control_act_index ], label=f'dfrc[{sim.control_act_index }]')
 # axes[0].set_title("joint pos")
 axes[0].set_ylabel("joint pos [rad]")
